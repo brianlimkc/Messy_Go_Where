@@ -12,7 +12,6 @@ router.get('/', async (req, res) => {
             .populate("userID")
             .populate("staffID")
 
-
         res.status(200).json({globalArrayOfIssues})
     } catch (e)
     {
@@ -39,7 +38,7 @@ router.get('/:id', async(req, res) => {
     }
 })
 
-//Issue Form - Post request
+//Issue Form - Post request (Not yet tested)
 router.post('/add/:issueID', async (req, res) => {
     const issues = new IssueModel(req.body)
     try {
@@ -50,7 +49,7 @@ router.post('/add/:issueID', async (req, res) => {
     }
 })
 
-// //For editing issues status //only done layout
+// //For updating issues/status of issues(Staff only) //only done layout
 // router.put("/edit", async(req, res)=> {
 //
 //     //splice or filter here
@@ -62,5 +61,9 @@ router.post('/add/:issueID', async (req, res) => {
 //     }
 // })
 
+//catch all other request (maybe dont need)
+router.get('*', (req, res)=>{
+    res.status(404).json({message: "Nothing to see here yet. Come back next time."})
+})
 
 module.exports = router
