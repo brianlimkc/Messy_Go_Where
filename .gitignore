@@ -1,0 +1,13 @@
+.env
+*.im;
+.idea
+.vs-code
+.DS_Store
+
+# npm
+node_modules
+package-lock.json
+*.log
+*.gz
+
+/node_modules/
