@@ -52,6 +52,7 @@ router.post('/login', async(req, res) => {
 
         let token = jwt.sign({user : {
                 id: user._id,
+                isAdmin: user.isAdmin
             }},process.env.JWTSECRET,{expiresIn: "7d" })
 
         res.status(200).json({token})

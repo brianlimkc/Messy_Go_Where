@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const IssueModel = require('../models/issue.model')
 const UserModel = require('../models/user.model')
+const checkUser = require('../lib/check')
+
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
 router.get('/', async (req, res) => {
@@ -36,12 +38,14 @@ router.get('/:id', async(req, res) => {
 })
 
 //(Tested - Can add to DB) Issue Form - Post request Can do up the issue form now
-router.post('/submit', async (req, res) => {
-    const issue = new IssueModel(req.body)
-console.log(issue)
+router.post('/submit', checkUser, async (req, res) => {
+    const newIssue = new IssueModel(req.body)
+    // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
+    newIssue.userID = req.user.id
+
     try {
-        await issue.save()
-        res.status(201).json({issue})
+        // await newIssue.save()
+        res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
         res.status(400).json
