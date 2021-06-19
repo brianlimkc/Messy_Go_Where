@@ -52,7 +52,7 @@ router.post('/login', async(req, res) => {
         //process.env.JWTSECRET
         let token = jwt.sign({user : {
                 id: user._id,
-                isOwner: user.isOwner
+                isAdmin: user.isAdmin
             }},process.env.JWTSECRET,{expiresIn: "7d" })
 
 
