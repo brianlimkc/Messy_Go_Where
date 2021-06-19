@@ -21,9 +21,9 @@ app.use(express.static('node_modules'))
 
 //routes
 
-app.use("/auth", require('./routes/auth.routes'))
-app.use("/issue", require('./routes/issue.routes'))
-app.use("/voucher", require('./routes/voucher.routes'))
+app.use("/api/auth", require('./routes/auth.routes'))
+app.use("api/issue", require('./routes/issue.routes'))
+app.use("/api/voucher", require('./routes/voucher.routes'))
 
 
 app.listen(process.env.PORT, () => console.log(`running on ${process.env.PORT}`))

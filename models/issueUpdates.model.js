@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 const issueUpdateSchema = new Schema({
     date: String,
     time: String,
-    update: Number,
+    update: String,
     updateStatus: {
         type: String,
         required: true,
@@ -13,8 +13,12 @@ const issueUpdateSchema = new Schema({
     },
     issueID: {
         type: Schema.Types.ObjectId,
+        ref: "Issue"
+    },
+    userID: {
+        type: Schema.Types.ObjectId,
         ref: "User"
-    }
+    },
 })
 
 module.exports = mongoose.model("IssueUpdate", issueUpdateSchema)
