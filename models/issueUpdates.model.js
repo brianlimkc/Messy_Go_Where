@@ -4,7 +4,10 @@ const Schema = mongoose.Schema
 const issueUpdateSchema = new Schema({
     date: String,
     time: String,
-    update: String,
+    update: {
+        type: String,
+        default: "Case under review"
+    },
     updateStatus: {
         type: String,
         required: true,

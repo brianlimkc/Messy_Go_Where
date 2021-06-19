@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const IssueModel = require('../models/issue.model')
 const UserModel = require('../models/user.model')
+const issueUpdateModel = require('../models/issueUpdates.model')
+const globalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
 
 
@@ -20,20 +22,23 @@ router.get('/', async (req, res) => {
 })
 
 //For individual user (UserId) Get their own issues array
-router.get('/:id', async(req, res) => {
+router.get('/:id/home', checkUser, async(req, res) => {
     try {
-        let user = await UserModel.find()
-            .populate("pendingIssues")
-            .populate("closedIssues")
-            .populate("voucherList")
+        if (!req.user.id === req.params.id) {
+            throw "Access denied"
+        }
 
-        //let individualIssues =
+        let user = await UserModel.find({_id: req.user.id})
+        .populate("pendingIssues")
+        .populate("closedIssues")
+        // .populate("voucherList")
+        console.log(user)
+        //let individualIssuesArray =
 
-        res.status(200).json({individualIssues})
-    } catch (e)
-    {
+        res.status(200).json({user})
+    } catch (e) {
         console.log(e)
-        res.status(400).json({"message" : e})
+        res.status(400).json({"message": e})
     }
 })
 
@@ -42,9 +47,24 @@ router.post('/submit', checkUser, async (req, res) => {
     const newIssue = new IssueModel(req.body)
     // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
     newIssue.userID = req.user.id
+    // newIssue.issueID = (DO we really need our own id?)
 
+    const newIssueUpdate = new issueUpdateModel()
+    newIssueUpdate.date = new Date() //has both date and time or let it be split
+    // newIssueUpdate.update = //update description - To be filled in at staff form
+    newIssueUpdate.userID = req.user.id
+    newIssueUpdate.issueID = newIssue._id
+
+    newIssue.updates = newIssueUpdate._id
+
+
+
+    console.log(newIssueUpdate)
+    console.log(newIssue)
     try {
         // await newIssue.save()
+        //await newIssueUpdate.save()
+        // await globalCaseStatusModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)

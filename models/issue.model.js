@@ -12,7 +12,7 @@ const issuesSchema = new Schema({
     updates: [{
         type: Schema.Types.ObjectId,
         ref: "IssueUpdate"
-    }],
+    }], //do we need [] here? or just let issue update be []
     issueStatus: {
         type: String,
         required: true,
