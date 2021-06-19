@@ -48,7 +48,7 @@ router.post('/submit', checkUser, async (req, res) => {
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
-        res.status(400).json
+        res.status(400).json({"message" : e})
     }
 })
 
