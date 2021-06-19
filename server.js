@@ -16,13 +16,13 @@ mongoose.connect(process.env.DB, {
 //middlewares
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(express.static('node_modules'))
+// app.use(express.static('node_modules')) //probably not useful, commented out but left here if it is necessary
 // app.use(express.static('public'))
 
 //routes
 
 app.use("/api/auth", require('./routes/auth.routes'))
-app.use("api/issue", require('./routes/issue.routes'))
+app.use("/api/issue", require('./routes/issue.routes'))
 app.use("/api/voucher", require('./routes/voucher.routes'))
 
 

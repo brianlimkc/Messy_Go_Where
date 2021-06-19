@@ -11,7 +11,7 @@ const issuesSchema = new Schema({
     rating: Number,
     updates: [{
         type: Schema.Types.ObjectId,
-        ref: "Update"
+        ref: "IssueUpdate"
     }],
     issueStatus: {
         type: String,

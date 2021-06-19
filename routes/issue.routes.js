@@ -1,17 +1,14 @@
 const router = require('express').Router()
-require('dotenv').config()
 const IssueModel = require('../models/issue.model')
 const UserModel = require('../models/user.model')
 
-//for staff
+//(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
 router.get('/', async (req, res) => {
+    let globalArrayOfIssues = await IssueModel.find()
+        .populate("IssueUpdate")
+        .populate("userID")
+        .populate("staffID")
     try {
-        let globalArrayOfIssues = await IssueModel.find()
-            .populate("updates")
-            .populate("issueStatus")
-            .populate("userID")
-            .populate("staffID")
-
         res.status(200).json({globalArrayOfIssues})
     } catch (e)
     {
@@ -38,11 +35,13 @@ router.get('/:id', async(req, res) => {
     }
 })
 
-//Issue Form - Post request (Not yet tested)
-router.post('/add/:issueID', async (req, res) => {
-    const issues = new IssueModel(req.body)
+//(Tested - Can add to DB) Issue Form - Post request Can do up the issue form now
+router.post('/submit', async (req, res) => {
+    const issue = new IssueModel(req.body)
+console.log(issue)
     try {
-        res.status(201).json({issues})
+        await issue.save()
+        res.status(201).json({issue})
     } catch(e){
         console.log(e)
         res.status(400).json
