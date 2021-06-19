@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const closedIssuesSchema = new Schema({
+const globalCaseStatus = new Schema({
     pendingIssues: [{
         type: Schema.Types.ObjectId,
         ref: "Issue"
@@ -12,4 +12,4 @@ const closedIssuesSchema = new Schema({
     }],
 })
 
-module.exports = mongoose.model("ClosedIssue", closedIssuesSchema)
+module.exports = mongoose.model("GlobalCaseStatus", globalCaseStatus)
