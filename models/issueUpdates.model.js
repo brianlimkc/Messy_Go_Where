@@ -5,6 +5,10 @@ const issueUpdateSchema = new Schema({
     date: String,
     time: String,
     description: String,
+    update: {
+        type: String,
+        default: "Case under review"
+    },
     updateStatus: {
         type: String,
         required: true,
