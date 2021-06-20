@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 const issueUpdateSchema = new Schema({
     date: String,
     time: String,
-    decrisption: String,
+    description: String,
     updateStatus: {
         type: String,
         required: true,
