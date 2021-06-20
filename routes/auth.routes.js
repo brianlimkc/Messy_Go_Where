@@ -69,7 +69,7 @@ router.post('/upload', async (req, res) => {
             upload_preset: 'MGW_profilePic',
         });
         console.log(uploadResponse);
-        res.json({ msg: 'yaya' });
+        res.status(201).json(uploadResponse);
     } catch (err) {
         console.error(err);
         res.status(500).json({ err: 'Something went wrong' });
