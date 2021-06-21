@@ -4,20 +4,28 @@ const UserModel = require('../models/user.model')
 const issueUpdateModel = require('../models/issueUpdates.model')
 const globalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
+require('dotenv').config()
 
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
-router.get('/', async (req, res) => {
-    let globalArrayOfIssues = await IssueModel.find()
-        .populate("IssueUpdate")
-        .populate("userID")
-        .populate("staffID")
+router.get('/',checkUser,async (req, res) => {
     try {
-        res.status(200).json({globalArrayOfIssues})
-    } catch (e)
-    {
+        if(req.user.userType === "User") {
+            throw "You are not authorized to view this page"
+        }
+        let globalArrayOfIssues = await IssueModel.find()
+            .populate("IssueUpdate")
+            .populate("userID")
+            .populate("staffID")
+        let globalCaseStatus = await globalCaseStatusModel.find()
+            .populate("openIssues")
+            .populate("pendingIssues")
+            .populate("closedIssueSs")
+            .populate("deletedIssues")
+        res.status(200).json({globalArrayOfIssues, globalCaseStatus})
+    } catch (e) {
         console.log(e)
-        res.status(400).json({"message" : e})
+        res.status(400).json({"message": e})
     }
 })
 
@@ -27,7 +35,7 @@ router.get('/user/home', checkUser, async(req, res) => {
         let user = await UserModel.find({_id: req.user.id})
         .populate("pendingIssues")
         .populate("closedIssues")
-        // .populate("voucherList")
+        // .populate("voucherList")q
         console.log(user)
         //let individualIssuesArray =
 
@@ -57,15 +65,13 @@ router.post('/submit', checkUser, async (req, res) => {
     newIssue.updates = newIssueUpdate._id
 
 
-    //Ask for this
-    const globalCaseStatus= new globalCaseStatusModel
-
     console.log(newIssueUpdate)
-    console.log(newIssue)
+    console.log("newIssueId", newIssue)
     try {
-        // await newIssue.save()
-        //await newIssueUpdate.save()
-        // await globalCaseStatusModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
+        await newIssue.save()
+        await newIssueUpdate.save()
+        await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { pendingIssues: newIssue._id}})
+        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
@@ -117,7 +123,7 @@ router.get('/closed', checkUser, async(req, res) => {
     }
 })
 
-//View Individual updates
+//View Individual updates for User usertype
 router.get('/:issueid', checkUser, async(req, res) => {
     let issueId = req.params.issueid
     // console.log(issueId)
@@ -146,6 +152,9 @@ router.get('/:issueid', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
+
+//Get globalCaseStatus
+router.get("")
 
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
