@@ -15,8 +15,8 @@ mongoose.connect(process.env.DB, {
 //middlewares
 app.use(express.json({limit: "10mb", extended: true}))
 app.use(express.urlencoded({limit: "10mb", extended: true}))
-app.use(express.static('node_modules'))
-app.use(express.static('public'))
+// app.use(express.static('node_modules'))
+// app.use(express.static('public'))
 
 
 //routes

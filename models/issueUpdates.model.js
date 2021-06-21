@@ -4,10 +4,9 @@ const Schema = mongoose.Schema
 const issueUpdateSchema = new Schema({
     date: String,
     time: String,
-    description: String,
-    update: {
+    updateDescription: { // to see whether there is further merge conflict
         type: String,
-        default: "Case under review"
+        default: "Case under review"  // chose to keep BT code
     },
     updateStatus: {
         type: String,
