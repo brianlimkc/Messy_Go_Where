@@ -91,4 +91,31 @@ router.post('/upload', async (req, res) => {
     }
 })
 
+router.post('/update', checkUser, async (req, res) => {
+    try {
+        let updateObj = req.body
+
+        await (updateObj.password) ? updateObj.password = await bcrypt.hash(updateObj.password, 10) :
+
+        await UserModel.findByIdAndUpdate(req.user.id, {$set: {...updateObj}})
+        res.status(200).json({message: "user updated"})
+        } catch (e)
+        {
+        console.log(e)
+            res.status(400).json({message: e})
+        }
+})
+
+router.delete('/delete', checkUser, async (req, res) => {
+    try {
+            let deleteObj = await UserModel.findByIdAndDelete(req.user.id)
+            console.log("deleted: ",deleteObj)
+            res.status(200).json({message: "user deleted"})
+        } catch (e)
+        {
+        console.log(e)
+            res.status(400).json({message: e})
+        }
+})
+
 module.exports = router
