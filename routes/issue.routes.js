@@ -79,20 +79,6 @@ router.post('/submit', checkUser, async (req, res) => {
     }
 })
 
-// //For updating issues/status of issues(Staff only) //only done layout
-// router.put("/edit", async(req, res)=> {
-//
-//     //splice or filter here
-//
-//     try {
-//         res.status(200).json({})
-//     }catch(e){
-//
-//     }
-// })
-
-
-
 //For pending issue
 router.get('/pending', checkUser, async(req, res) => {
     try {
@@ -153,8 +139,18 @@ router.get('/:issueid', checkUser, async(req, res) => {
     }
 })
 
-//Get globalCaseStatus
-router.get("")
+//For updating issues status (Staff only)
+router.put("/update/:", async(req, res)=> {
+
+    //splice or filter here
+
+    try {
+        res.status(200).json({})
+    }catch(e){
+
+    }
+})
+
 
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
