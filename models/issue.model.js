@@ -17,7 +17,32 @@ const issuesSchema = new Schema({
         type: String,
         required: true,
         default: "Open",
-        enum: ["Open","In Progress","Closed","Deleted"]
+        enum: [
+            "Open",
+            "In Progress",
+            "Closed",
+            "Deleted"
+        ]
+    },
+    issueType: {
+        type: String,
+        required: true,
+        default: "General",
+        enum: [
+            "General",
+            "Pests",
+            "Animal & Birds",
+            "Cleanliness",
+            "Roads & Footpaths",
+            "Facilities in HDB",
+            "Drinking Water",
+            "Drains & Sewers",
+            "Parks & Greenery",
+            "Construction Sites",
+            "Abandoned Trolleys",
+            "Shared Bicycles",
+            "Illegal Parking"
+        ]
     },
     userID: {
         type: Schema.Types.ObjectId,

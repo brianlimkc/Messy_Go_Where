@@ -12,11 +12,10 @@ mongoose.connect(process.env.DB, {
     console.log("mongodb running")
 })
 
-
 //middlewares
-app.use(express.json())
-app.use(express.urlencoded({extended: true}))
-// app.use(express.static('node_modules')) //probably not useful, commented out but left here if it is necessary
+app.use(express.json({limit: "10mb", extended: true}))
+app.use(express.urlencoded({limit: "10mb", extended: true}))
+// app.use(express.static('node_modules'))
 // app.use(express.static('public'))
 
 //routes
