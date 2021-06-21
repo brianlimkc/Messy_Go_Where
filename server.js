@@ -12,7 +12,6 @@ mongoose.connect(process.env.DB, {
     console.log("mongodb running")
 })
 
-
 //middlewares
 app.use(express.json({limit: "10mb", extended: true}))
 app.use(express.urlencoded({limit: "10mb", extended: true}))
