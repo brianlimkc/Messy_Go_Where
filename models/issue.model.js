@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const issuesSchema = new Schema({
-    issueID : Number,
+    issueID : String,
     picture : String,
     description: String,
     date: String,
@@ -11,13 +11,38 @@ const issuesSchema = new Schema({
     rating: Number,
     updates: [{
         type: Schema.Types.ObjectId,
-        ref: "Update"
-    }],
+        ref: "IssueUpdate"
+    }], //do we need [] here? or just let issue update be []
     issueStatus: {
         type: String,
         required: true,
         default: "Open",
-        enum: ["Open","In Progress","Closed","Deleted"]
+        enum: [
+            "Open",
+            "In Progress",
+            "Closed",
+            "Deleted"
+        ]
+    },
+    issueType: {
+        type: String,
+        required: true,
+        default: "General",
+        enum: [
+            "General",
+            "Pests",
+            "Animal & Birds",
+            "Cleanliness",
+            "Roads & Footpaths",
+            "Facilities in HDB",
+            "Drinking Water",
+            "Drains & Sewers",
+            "Parks & Greenery",
+            "Construction Sites",
+            "Abandoned Trolleys",
+            "Shared Bicycles",
+            "Illegal Parking"
+        ]
     },
     userID: {
         type: Schema.Types.ObjectId,
