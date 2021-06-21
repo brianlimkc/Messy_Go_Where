@@ -18,21 +18,30 @@ router.get('/user', checkUser, async(req, res) => {
 //
 router.post('/register', async (req, res) => {
     try {
-        let user = new UserModel(req.body)
-        user.password = await bcrypt.hash(user.password, 10)
-        let newNanoId = await nanoid(8).toUpperCase()
-        user.id = `${(user.userType==="User")?"U-":"S-"}${newNanoId}`
-        user.isAdmin = false
-        console.log(user)
-        await user.save()
-        //
-        let token = jwt.sign({user : {
-                id: user._id,
-                userType: user.userType,
-                isAdmin: user.isAdmin
-            }},process.env.JWTSECRET, {expiresIn: "7d" })
+            let emailSearch = await UserModel.findOne({email: req.body.email});
+            if (emailSearch) {
+                // throw "Email already exist!"
+                res.status(400).json({message: "Duplicate email. Please use another email."});
+            } else {
 
-        res.status(201).json({token})
+                let user = new UserModel(req.body)
+                user.password = await bcrypt.hash(user.password, 10)
+                let newNanoId = await nanoid(8).toUpperCase()
+                user.id = `${(user.userType === "User") ? "U-" : "S-"}${newNanoId}`
+                user.isAdmin = false
+                console.log(user)
+                await user.save()
+                //
+                let token = jwt.sign({
+                    user: {
+                        id: user._id,
+                        userType: user.userType,
+                        isAdmin: user.isAdmin
+                    }
+                }, process.env.JWTSECRET, {expiresIn: "7d"})
+
+                res.status(201).json({token})
+            }
     } catch (e) {
         console.log(e)
         res.status(400).json({message: "user not created"})
