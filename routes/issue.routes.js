@@ -88,7 +88,7 @@ router.post('/submit', checkUser, async (req, res) => {
 
 
 //For pending issue
-router.get('/issue/pending', checkUser, async(req, res) => {
+router.get('/pending', checkUser, async(req, res) => {
     try {
         let user = await UserModel.find({_id: req.user.id})
             .populate("pendingIssues")
@@ -102,7 +102,7 @@ router.get('/issue/pending', checkUser, async(req, res) => {
 })
 
 //For closed issue
-router.get('/issue/closed', checkUser, async(req, res) => {
+router.get('/closed', checkUser, async(req, res) => {
     try {
         let user = await UserModel.find({_id: req.user.id})
             .populate("closedIssues")
@@ -117,16 +117,30 @@ router.get('/issue/closed', checkUser, async(req, res) => {
     }
 })
 
-//stopped here cuz
-router.get('/issue/:id', checkUser, async(req, res) => {
+//View Individual updates
+router.get('/:issueid', checkUser, async(req, res) => {
+    let issueId = req.params.issueid
+    // console.log(issueId)
     try {
         let user = await UserModel.find({_id: req.user.id})
-            .populate("closedIssues")
-        // .populate("voucherList")
-        console.log(user)
-        //let individualIssuesArray =
 
-        res.status(200).json({user})
+        let pendIssue = user[0]["pendingIssues"]
+        let closedIssue = user[0]["closedIssues"]
+
+        //leaving these consolelogs to explain later
+        // console.log(pendIssue.includes(issueId))
+        // console.log(closedIssue.includes(issueId))
+        let currentIssue = [] //might need better naming
+        if (pendIssue.includes(issueId) || closedIssue.includes(issueId)){
+             currentIssue = await IssueModel.find({_id: issueId}) // change if we use our own issueid
+                .populate("updates")
+            // .populate("voucherList")
+            console.log(currentIssue)
+        } else {
+            throw "issue not found for this user."
+        }
+
+        res.status(200).json({currentIssue})
     } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
