@@ -6,6 +6,8 @@ const globalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
 const { cloudinary } = require('../lib/cloundinary')
 const { nanoid } = require('nanoid')
+const globalCaseStatusID = "60d04a0f21a73227222ac063"
+
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
 router.get('/', async (req, res) => {
@@ -59,17 +61,17 @@ router.post('/submit', checkUser, async (req, res) => {
     newIssue.updates = newIssueUpdate._id
 
 
-    //Ask for this
-    const globalCaseStatus= new globalCaseStatusModel
+    // //Ask for this
+    // const globalCaseStatus= new globalCaseStatusModel
 
     console.log(newIssueUpdate)
     console.log(newIssue)
 
-
     try {
         await newIssue.save()
         await newIssueUpdate.save()
-        await globalCaseStatusModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
+        await globalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { pendingIssues: newIssue._id  }})
+        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
