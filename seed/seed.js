@@ -2,91 +2,94 @@ const mongoose = require("mongoose");
 require('dotenv').config()
 const issueModel = require("../models/issue.model")
 const userModel = require("../models/user.model")
+const IssueUpdatesModel = require("../models/issueUpdates.model")
 
-mongoose.connect(process.env.DB, {
-    useFindAndModify: false,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useNewUrlParser: true
-}).then(() => {
-    console.log("mongodb running")
-})
+console.log(process.env.DB)
 
-userModel.deleteMany().then(()=>{
-    process.exit()
-})
+// mongoose.connect(process.env.DB, {
+//     useFindAndModify: false,
+//     useCreateIndex: true,
+//     useUnifiedTopology: true,
+//     useNewUrlParser: true
+// }).then(() => {
+//     console.log("mongodb running")
+// })
 
-userModel.insertMany([
-    {
-        id: "u-00001",
-        name: "John Smith",
-        email: "jsmith@example.com",
-        password: "abcde12345",
-        userType: "User",
-        isAdmin: false,
-        pendingIssues: [],
-        closedIssues: [],
-        points: 999,
-        issuesSubmitted: 99,
-        voucherList : [],
-    },
-    {
-        id: "u-00002",
-        name: "Sally Jones",
-        email: "sjones@example.com",
-        password: "abcde12345",
-        userType: "User",
-        isAdmin: false,
-        pendingIssues: [],
-        closedIssues: [],
-        points: 999,
-        issuesSubmitted: 99,
-        voucherList : [],
-    },
-    {
-        id: "u-00003",
-        name: "Roger Lee",
-        email: "rlee@example.com",
-        password: "abcde12345",
-        userType: "User",
-        isAdmin: false,
-        pendingIssues: [],
-        closedIssues: [],
-        points: 999,
-        issuesSubmitted: 99,
-        voucherList : [],
-    },
-    {
-        id: "s-00001",
-        name: "Charles Jordan",
-        email: "cjordan@example.com",
-        password: "abcde12345",
-        userType: "Staff",
-        isAdmin: false,
-        pendingIssues: [],
-        closedIssues: [],
-        points: 999,
-        issuesSubmitted: 99,
-        voucherList : [],
-    },
-    {
-        id: "s-00002",
-        name: "William James",
-        email: "cjordan@example.com",
-        password: "abcde12345",
-        userType: "Staff",
-        isAdmin: true,
-        pendingIssues: [],
-        closedIssues: [],
-        points: 999,
-        issuesSubmitted: 99,
-        voucherList : [],
-    },
-
-])
-    .then(()=>{
-        process.exit()
-    })
+// userModel.deleteMany().then(()=>{
+//     process.exit()
+// })
+//
+// userModel.insertMany([
+//     {
+//         id: "u-00001",
+//         name: "John Smith",
+//         email: "jsmith@example.com",
+//         password: "abcde12345",
+//         userType: "User",
+//         isAdmin: false,
+//         pendingIssues: [],
+//         closedIssues: [],
+//         points: 999,
+//         issuesSubmitted: 99,
+//         voucherList : [],
+//     },
+//     {
+//         id: "u-00002",
+//         name: "Sally Jones",
+//         email: "sjones@example.com",
+//         password: "abcde12345",
+//         userType: "User",
+//         isAdmin: false,
+//         pendingIssues: [],
+//         closedIssues: [],
+//         points: 999,
+//         issuesSubmitted: 99,
+//         voucherList : [],
+//     },
+//     {
+//         id: "u-00003",
+//         name: "Roger Lee",
+//         email: "rlee@example.com",
+//         password: "abcde12345",
+//         userType: "User",
+//         isAdmin: false,
+//         pendingIssues: [],
+//         closedIssues: [],
+//         points: 999,
+//         issuesSubmitted: 99,
+//         voucherList : [],
+//     },
+//     {
+//         id: "s-00001",
+//         name: "Charles Jordan",
+//         email: "cjordan@example.com",
+//         password: "abcde12345",
+//         userType: "Staff",
+//         isAdmin: false,
+//         pendingIssues: [],
+//         closedIssues: [],
+//         points: 999,
+//         issuesSubmitted: 99,
+//         voucherList : [],
+//     },
+//     {
+//         id: "s-00002",
+//         name: "William James",
+//         email: "cjordan@example.com",
+//         password: "abcde12345",
+//         userType: "Staff",
+//         isAdmin: true,
+//         pendingIssues: [],
+//         closedIssues: [],
+//         points: 999,
+//         issuesSubmitted: 99,
+//         voucherList : [],
+//     },
+//
+// ])
+//     .then(()=>{
+//         process.exit()
+//     })
 
 // issueModel.deleteMany().then(()=>{
 //     process.exit()
@@ -164,3 +167,25 @@ userModel.insertMany([
 // .then(()=>{
 //     process.exit()
 // })
+
+// IssueUpdatesModel.deleteMany().then(()=>{
+//     process.exit()
+// })
+//
+// IssueUpdatesModel.insertMany([
+//     {
+//         date: "22/06/2021",
+//         time: "1200",
+//         updateDescription: "first",
+//         updateStatus: "Open",
+//     },
+//     {
+//         date: "22/06/2021",
+//         time: "0500",
+//         updateDescription: "second",
+//         updateStatus: "In Progress",
+//     }
+// ])
+//     .then(()=>{
+//         process.exit()
+//     })

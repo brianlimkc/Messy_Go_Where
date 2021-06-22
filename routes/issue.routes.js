@@ -149,21 +149,30 @@ router.get('/',checkUser,async (req, res) => {
 })
 
 
-//For updating issues status (Staff only) ----- Not completed yet
+//For updating issues status (Staff only) ----- completed
 router.put("/update/:issueid",checkUser, async(req, res)=> {
+    console.log("params", req.params.issueid)
+
     try {
         if(req.user.userType === "User") {
             throw "You are not authorized to view this page"
         }
-        let globalCaseStatus = await globalCaseStatusModel.find()
-            .populate("openIssues")
-            .populate("pendingIssues")
-            .populate("closedIssueSs")
-            .populate("deletedIssues")
 
-        //find by id and update
+        //IssueUpdates
+        const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = req.body.date //has both date and time or let it be split
+        newIssueUpdate.time = req.body.time //has both date and time or let it be split
+        // newIssueUpdate.update = //update description - To be filled in at staff form
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = req.params.issueid
+        await newIssueUpdate.save()
 
-        res.status(200).json({globalCaseStatus})
+        //findById issue and push into updates array
+        await IssueModel.findOneAndUpdate({_id:req.params.issueid}, {$push: { updates: newIssueUpdate._id}})
+
+
+        // let updatedIssue = issueUpdateModel.findOne({issueID:req.params.issueid},{})
+        res.status(201).json({newIssueUpdate})
     }catch(e){
         console.log(e)
         res.status(400).json({"message": e})
