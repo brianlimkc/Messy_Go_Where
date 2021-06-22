@@ -8,8 +8,8 @@ const voucherSchema = new Schema({
     status: {
         type: String,
         required: true,
-        default: "Redeemed",
-        enum: ["Redeemed","Used"]
+        default: "Available",
+        enum: ["Redeemed","Available"]
         },
     issuedTo: {
         type: Schema.Types.ObjectId,
