@@ -3,8 +3,11 @@ require('dotenv').config()
 const issueModel = require("../models/issue.model")
 const userModel = require("../models/user.model")
 const IssueUpdatesModel = require("../models/issueUpdates.model")
+const globalCaseModel = require("../models/globalCaseStatus.model")
+
 
 console.log(process.env.DB)
+
 
 // mongoose.connect(process.env.DB, {
 //     useFindAndModify: false,
@@ -14,6 +17,21 @@ console.log(process.env.DB)
 // }).then(() => {
 //     console.log("mongodb running")
 // })
+
+globalCaseModel.deleteMany().then(()=>{
+    process.exit()
+})
+
+globalCaseModel.insertMany([
+    {
+        openIssues: [],
+        pendingIssues: [],
+        closedIssues: [],
+        deletedIssues: [],
+    }
+    ])
+
+
 
 // userModel.deleteMany().then(()=>{
 //     process.exit()
