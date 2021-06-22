@@ -4,7 +4,8 @@ const UserModel = require('../models/user.model')
 const issueUpdateModel = require('../models/issueUpdates.model')
 const globalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
-
+const { cloudinary } = require('../lib/cloundinary')
+const { nanoid } = require('nanoid')
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
 router.get('/', async (req, res) => {
@@ -40,11 +41,12 @@ router.get('/user/home', checkUser, async(req, res) => {
 
 //(Tested - Can add to DB) Issue Form - Post request Can do up the issue form now
 router.post('/submit', checkUser, async (req, res) => {
+
+
     const newIssue = new IssueModel(req.body)
     // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
     newIssue.userID = req.user.id
-    // newIssue.issueID = (do we really need our own id since they got their own _id?)
-
+    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
 
     //IssueUpdates
     const newIssueUpdate = new issueUpdateModel()
@@ -62,10 +64,12 @@ router.post('/submit', checkUser, async (req, res) => {
 
     console.log(newIssueUpdate)
     console.log(newIssue)
+
+
     try {
-        // await newIssue.save()
-        //await newIssueUpdate.save()
-        // await globalCaseStatusModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
+        await newIssue.save()
+        await newIssueUpdate.save()
+        await globalCaseStatusModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id  }})
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
@@ -136,6 +140,21 @@ router.get('/issue/:id', checkUser, async(req, res) => {
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
     res.status(404).json({message: "Nothing to see here yet. Come back next time."})
+})
+
+// photo upload
+router.post('/upload', async (req, res) => {
+    try {
+        const fileStr = req.body.data;
+        const uploadResponse = await cloudinary.uploader.upload(fileStr, {
+            upload_preset: 'MGW_issuesPic',
+        });
+        console.log(uploadResponse);
+        res.status(201).json(uploadResponse);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ err: 'Something went wrong' });
+    }
 })
 
 module.exports = router
