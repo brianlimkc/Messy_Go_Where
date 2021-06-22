@@ -10,6 +10,8 @@ const { nanoid } = require('nanoid')
 router.get('/user', checkUser, async(req, res) => {
     try{
         let user = await UserModel.findById(req.user.id, "-password")
+            .populate("pendingIssues")
+            .populate("closedIssues")
         res.status(200).json({user})
     }catch(e){
         res.status(500).json({ message: "something went wrong"})
