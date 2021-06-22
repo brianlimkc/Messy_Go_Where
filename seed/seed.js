@@ -2,16 +2,21 @@ const mongoose = require("mongoose");
 require('dotenv').config()
 const issueModel = require("../models/issue.model")
 const userModel = require("../models/user.model")
+const IssueUpdatesModel = require("../models/issueUpdates.model")
 const globalCaseModel = require("../models/globalCaseStatus.model")
 
-mongoose.connect(process.env.DB, {
-    useFindAndModify: false,
-    useCreateIndex: true,
-    useUnifiedTopology: true,
-    useNewUrlParser: true
-}).then(() => {
-    console.log("mongodb running")
-})
+
+console.log(process.env.DB)
+
+
+// mongoose.connect(process.env.DB, {
+//     useFindAndModify: false,
+//     useCreateIndex: true,
+//     useUnifiedTopology: true,
+//     useNewUrlParser: true
+// }).then(() => {
+//     console.log("mongodb running")
+// })
 
 globalCaseModel.deleteMany().then(()=>{
     process.exit()
@@ -25,6 +30,7 @@ globalCaseModel.insertMany([
         deletedIssues: [],
     }
     ])
+
 
 
 // userModel.deleteMany().then(()=>{
@@ -179,3 +185,25 @@ globalCaseModel.insertMany([
 // .then(()=>{
 //     process.exit()
 // })
+
+// IssueUpdatesModel.deleteMany().then(()=>{
+//     process.exit()
+// })
+//
+// IssueUpdatesModel.insertMany([
+//     {
+//         date: "22/06/2021",
+//         time: "1200",
+//         updateDescription: "first",
+//         updateStatus: "Open",
+//     },
+//     {
+//         date: "22/06/2021",
+//         time: "0500",
+//         updateDescription: "second",
+//         updateStatus: "In Progress",
+//     }
+// ])
+//     .then(()=>{
+//         process.exit()
+//     })
