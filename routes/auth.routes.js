@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const checkUser = require("../lib/check")
 const { cloudinary } = require('../lib/cloundinary')
-
+const { nanoid } = require('nanoid')
 
 router.get('/user', checkUser, async(req, res) => {
     try{
@@ -19,13 +19,17 @@ router.get('/user', checkUser, async(req, res) => {
 router.post('/register', async (req, res) => {
     try {
         let user = new UserModel(req.body)
-
         user.password = await bcrypt.hash(user.password, 10)
+        let newNanoId = await nanoid(8).toUpperCase()
+        user.id = `${(user.userType==="User")?"U-":"S-"}${newNanoId}`
+        user.isAdmin = false
         console.log(user)
         await user.save()
         //
         let token = jwt.sign({user : {
-                id: user._id
+                id: user._id,
+                userType: user.userType,
+                isAdmin: user.isAdmin
             }},process.env.JWTSECRET, {expiresIn: "7d" })
 
         res.status(201).json({token})
@@ -52,6 +56,7 @@ router.post('/login', async(req, res) => {
 
         let token = jwt.sign({user : {
                 id: user._id,
+                userType: user.userType,
                 isAdmin: user.isAdmin
             }},process.env.JWTSECRET,{expiresIn: "7d" })
 
