@@ -12,7 +12,7 @@ const issueUpdateSchema = new Schema({
         type: String,
         required: true,
         default: "Open",
-        enum: ["Open","In Progress","Closed","Deleted"]
+        enum: ["Open","In Progress","Resolved","Deleted"]
     },
     issueID: {
         type: Schema.Types.ObjectId,
