@@ -49,8 +49,8 @@ router.post('/submit', checkUser, async (req, res) => {
     const newIssue = new IssueModel(req.body)
     // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
     newIssue.userID = req.user.id
-    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`  
-  
+    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
+
 
 
     //IssueUpdates
@@ -123,7 +123,7 @@ router.get('/issue/:id', checkUser, async(req, res) => {
         //let individualIssuesArray =
 
         res.status(200).json({user})
-      
+
           } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
@@ -162,7 +162,6 @@ router.get('/single/:issueid', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
           }
 })
-
 
 // photo upload
 router.post('/upload', async (req, res) => {
@@ -230,7 +229,6 @@ router.put("/update/:issueid",checkUser, async(req, res)=> {
 
         //findById issue and push into updates array
         await IssueModel.findOneAndUpdate({_id:req.params.issueid}, {$push: { updates: newIssueUpdate._id}})
-
 
         // let updatedIssue = issueUpdateModel.findOne({issueID:req.params.issueid},{})
         res.status(201).json({newIssueUpdate})
