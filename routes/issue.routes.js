@@ -131,7 +131,7 @@ router.get('/issue/:id', checkUser, async(req, res) => {
 //User - View Individual updates for User usertype
 router.get('/single/:issueid', checkUser, async(req, res) => {
     let thisIssueId = req.params.issueid
-    // console.log(issueId)
+
     try {
         let singleIssue = await IssueModel.findById(thisIssueId)
             .populate("updates")
@@ -321,16 +321,20 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
         await UserModel.findByIdAndUpdate(currentStaffID, {push: {pendingIssues: issueID}})
 
         // update Issue updates with new issue update, issueStatus and staffID
-        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: { updates: newIssueUpdate._id}}, {$set: {issueStatus: "In Progress", staffID: currentStaffID}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdate._id}}, {
+            $set: {
+                issueStatus: "In Progress",
+                staffID: currentStaffID
+            }
+        })
 
         //update globalStatus
         await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {pendingIssues: issueID}})
         await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {closedIssues: issueID}})
         res.status(200).json({newIssueUpdate})
-    } catch (e)
-        {
+    } catch (e) {
         res.status(400).json({"message": e})
-        }
+    }
 })
 
 router.post('/iResolved/:issueid', checkUser, async (req, res) => {
@@ -346,7 +350,9 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
         await newIssueUpdate.save()
 
         // update issue status
-        await IssueModel.findByIdAndUpdate(issueID, {$push: { updates: newIssueUpdate._id}}, {$set: {issueStatus: "Resolved"}})
+        await IssueModel.findByIdAndUpdate(issueID, {$push: {updates: newIssueUpdate._id}})
+        await IssueModel.findByIdAndUpdate(issueID, {$set: {issueStatus: "Resolved"}})
+
 
         //update user pendingIssues and closedIssues
         let currentUserID = IssueModel.find(issueID).userID
@@ -364,18 +370,19 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
         // increment points to user TBC
 
         res.status(200).json({newIssueUpdate})
-    } catch (e)
-    {
+    } catch (e) {
         res.status(400).json({"message": e})
     }
 })
 
 router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
+    console.log("inside delete issue")
     try {
         let issueID = req.params.issueid
-        let currentIssue = IssueModel.find(issueID)
+        let currentIssue = await IssueModel.findById(issueID)
+
         let currentUserID = currentIssue.userID
-        let currentStatus =  currentIssue.issueStatus
+        let currentStatus = currentIssue.issueStatus
 
         // create new DELETED issueUpdate and save
         const newIssueUpdate = new issueUpdateModel(req.body)
@@ -386,7 +393,7 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
         // auto description?
         await newIssueUpdate.save()
 
-        switch (currentIssue) {
+        switch (currentStatus) {
             case "Open":
                 // pull from global status openIssues
                 await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {openIssues: issueID}})
@@ -405,13 +412,15 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
         await UserModel.findByIdAndUpdate(currentUserID, {$push: {closedIssues: issueID}})
 
         // update issue issueStatus and updates
-        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: { updates: newIssueUpdate._id}}, {$set: {issueStatus: "Deleted"}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdate._id}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {issueStatus: "Deleted"}})
+
 
         // push into global status deleted issues
         await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {deletedIssues: issueID}})
         res.status(200).json({newIssueUpdate})
-    } catch (e)
-    {
+    } catch (e) {
+        console.log(e)
         res.status(400).json({"message": e})
     }
 })
