@@ -16,6 +16,8 @@ router.get('/', async (req,res) => {
     }
 })
 
+
+// Only admin can create,later at the router.post can test if user is admin.
 router.get("/admin/create", checkUser, async (req, res)=>{
     let vouchers = await VoucherModel.find()
     
@@ -26,16 +28,18 @@ router.get("/admin/create", checkUser, async (req, res)=>{
     }
 })
 
-
+// do take note, for admin to create new voucher, please hardcode in voucherTemplate
 router.post('/admin/create', checkUser, async (req, res)=>{
     let voucher = new VoucherModel(req.body)
     console.log("this account is admin", req.user.isAdmin)
     try {
+        // this is the test for Admin
+        // so if user is not admin, then it'll go into the error.
+        // reasoning is (!true) -> the code will not run. so will go to the save()
         if(!req.user.isAdmin){
             throw "yo mama"
         }
         await voucher.save()
-        // await UserModel.findByIdAndUpdate(req.body.id, {$push : {vouchers : voucher.voucherId}})
 
       res.status(200).json({"new voucher" : voucher})  
     } catch (error) {
@@ -44,6 +48,10 @@ router.post('/admin/create', checkUser, async (req, res)=>{
     }
 })
 
+
+// This bit of code is for the user to select the voucher. 
+//voucher has to be value="num", so req.body.num will have a value.
+// please refer to voucherTemplate
 router.post('/user', checkUser, async (req, res)=>{
     let temp = {
         ...voucherTemplate[req.body.num],
@@ -54,17 +62,8 @@ router.post('/user', checkUser, async (req, res)=>{
     try {
         let voucher = new VoucherModel(temp)
         await voucher.save()
-        // let user = await UserModel.find();
-        // let findUserId;
-        // console.log(req.user)
-        // user.map(el=>{
-        //     el._id==req.user.id ? findUserId=el.id : false
-        // })
-        
-        // if(!findUserId){
-        //     throw "good morning loser"
-        // }
-        console.log(voucher)
+
+        // console.log(voucher)
         
         await UserModel.findByIdAndUpdate(req.user.id, {$push : {voucherList : voucher._id}})
         res.status(200).json({"voucher added" : voucher}) 
