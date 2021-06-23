@@ -57,14 +57,12 @@ router.post('/user', checkUser, async (req, res)=>{
         ...voucherTemplate[req.body.num],
         issuedTo : req.user.id
     }
-
     
     try {
         let voucher = new VoucherModel(temp)
         await voucher.save()
 
-        // console.log(voucher)
-        
+        // console.log(voucher) // will show the voucher that's tagged to the user.
         await UserModel.findByIdAndUpdate(req.user.id, {$push : {voucherList : voucher._id}})
         res.status(200).json({"voucher added" : voucher}) 
     } catch (error) {
@@ -74,14 +72,23 @@ router.post('/user', checkUser, async (req, res)=>{
 
 
 router.get('/use', checkUser, async (req,res)=>{
-    let allVouchers = await VoucherModel.find()
-
-    let user = await UserModel.findById(req.user.id)
-                            .populate("voucherList")
-
-    console.log("lai", req.user.id)
-    console.log("after that", user)
     try {
+        let allVouchers = await VoucherModel.find()
+    
+        let user = await UserModel.findById(req.user.id)
+        .populate("voucherList")
+
+        
+        // Finally can remove the voucher
+        // same way as adding voucher to user.
+        // if console.log(user.voucherList) <- this will show an array with objects.
+        // like commented code below.
+        user.voucherList.map(el=>{
+            console.log("can log?",el._id)
+        })
+        await UserModel.findByIdAndUpdate(req.user.id, { $pull : {voucherList: user.voucherList[req.body.num]}})
+
+        console.log("after that", user.voucherList)
         res.status(200).json({"voucher used" : allVouchers}) 
     } catch (error) {
         res.status(400).json({"message" : error})
