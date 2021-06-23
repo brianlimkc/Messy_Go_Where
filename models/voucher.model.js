@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const voucherSchema = new Schema({
+    voucherId: String,
     picture: String,
     description: String,
     pointsCost: Number,

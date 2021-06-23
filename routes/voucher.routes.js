@@ -17,9 +17,7 @@ router.get('/', async (req,res) => {
 
 router.get("/admin/create", checkUser, async (req, res)=>{
     let vouchers = await VoucherModel.find()
-
     
-
     try {
         res.status(200).json({"vouchers" : vouchers})
     } catch (error) {
@@ -28,14 +26,19 @@ router.get("/admin/create", checkUser, async (req, res)=>{
 })
 
 
-router.post('/admin/create', async (req, res)=>{
+router.post('/admin/create', checkUser, async (req, res)=>{
     let voucher = new VoucherModel(req.body)
-    await voucher.save()
-    await UserModel.findByIdAndUpdate(req.body.id, {$push : {vouchers : voucher.voucherId}})
-
+    console.log("this account is admin", req.user.isAdmin)
     try {
+        if(!req.user.isAdmin){
+            throw "yo mama"
+        }
+        await voucher.save()
+        await UserModel.findByIdAndUpdate(req.body.id, {$push : {vouchers : voucher.voucherId}})
+    
       res.status(200).json({"new voucher" : voucher})  
     } catch (error) {
+        console.log(error)
         res.status(200).json({"message" : error})
     }
 })
