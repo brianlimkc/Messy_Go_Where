@@ -49,8 +49,8 @@ router.post('/submit', checkUser, async (req, res) => {
     const newIssue = new IssueModel(req.body)
     // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
     newIssue.userID = req.user.id
-    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`  
-  
+    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
+
 
 
     //IssueUpdates
@@ -123,7 +123,7 @@ router.get('/issue/:id', checkUser, async(req, res) => {
         //let individualIssuesArray =
 
         res.status(200).json({user})
-      
+
           } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
@@ -188,21 +188,26 @@ Staff
 */
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
-router.get('/',checkUser,async (req, res) => {
+router.get('/global',checkUser,async (req, res) => {
+    console.log("inside globalStatus Route")
     try {
-        if(req.user.userType === "User") {
-            throw "You are not authorized to view this page"
-        }
-        let globalArrayOfIssues = await IssueModel.find()
-            .populate("IssueUpdate")
-            .populate("userID")
-            .populate("staffID")
+        // if(req.user.userType === "User") {
+        //     throw "You are not authorized to view this page"
+        // }
+        // let globalArrayOfIssues = await IssueModel.find()
+        //     .populate("IssueUpdate")
+        //     .populate("userID")
+        //     .populate("staffID")
         let globalCaseStatus = await globalCaseStatusModel.find()
             .populate("openIssues")
-            .populate("pendingIssues")
-            .populate("closedIssueSs")
-            .populate("deletedIssues")
-        res.status(200).json({globalArrayOfIssues, globalCaseStatus})
+            // .populate("pendingIssues")
+            // .populate("closedIssueSs")
+            // .populate("deletedIssues")
+
+        // console.log(globalCaseStatus[0].openIssues)
+         // res.status(200).json({globalArrayOfIssues, globalCaseStatus})
+        res.status(200).json({globalCaseStatus})
+
     } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
