@@ -131,37 +131,38 @@ router.get('/issue/:id', checkUser, async(req, res) => {
 })
 
 //User - View Individual updates for User usertype
-router.get('/:issueid', checkUser, async(req, res) => {
+router.get('/single/:issueid', checkUser, async(req, res) => {
     let thisIssueId = req.params.issueid
     // console.log(issueId)
     try {
-        let user = await UserModel.find({_id: req.user.id})
+        let singleIssue = await IssueModel.findById(thisIssueId)
+            .populate("updates")
 
-        let pendIssue = user[0]["pendingIssues"]
-        let closedIssue = user[0]["closedIssues"]
-
-        //leaving these consolelogs to explain later
-        // console.log(pendIssue.includes(thisIssueId))
-        // console.log(closedIssue.includes(thisIssueId))
-        let currentIssue = [] //might need better naming
-        if (pendIssue.includes(thisIssueId) || closedIssue.includes(thisIssueId)){
-             currentIssue = await IssueModel.find({_id: thisIssueId}) // change if we use our own issueid
-                .populate("updates")
-            // .populate("voucherList")
-            console.log(currentIssue)
-        } else {
-            throw "issue not found for this user."
-        }
-
-        res.status(200).json({currentIssue})
-
-
-
-
-//catch all other request (maybe dont need)
-router.get('*', (req, res)=>{
-    res.status(404).json({message: "Nothing to see here yet. Come back next time."})
+        // let user = await UserModel.find({_id: req.user.id})
+        //
+        // let pendIssue = user[0]["pendingIssues"]
+        // let closedIssue = user[0]["closedIssues"]
+        //
+        // //leaving these consolelogs to explain later
+        // // console.log(pendIssue.includes(thisIssueId))
+        // // console.log(closedIssue.includes(thisIssueId))
+        // let currentIssue = [] //might need better naming
+        // if (pendIssue.includes(thisIssueId) || closedIssue.includes(thisIssueId)){
+        //      currentIssue = await IssueModel.findById({_id: thisIssueId}) // change if we use our own issueid
+        //         .populate("updates")
+        //     // .populate("voucherList")
+        //     console.log(currentIssue)
+        // } else {
+        //     throw "issue not found for this user."
+        // }
+        console.log("singleIssue retrieved")
+        res.status(200).json({singleIssue})
+    } catch (e) {
+        console.log(e)
+        res.status(400).json({"message": e})
+          }
 })
+
 
 // photo upload
 router.post('/upload', async (req, res) => {
@@ -175,6 +176,7 @@ router.post('/upload', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ err: 'Something went wrong' });
+
     }
 })
 
