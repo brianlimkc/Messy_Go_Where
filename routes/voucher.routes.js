@@ -2,7 +2,7 @@ const router = require('express').Router();
 const VoucherModel = require("../models/voucher.model");
 const UserModel = require("../models/user.model");
 const checkUser = require("../lib/check");
-const voucherTemplate = require('../lib/voucherTemplate')
+const voucherTemplate = require('../lib/voucherTemplate');
 
 
 // Getting all vouchers info (currently returns empty array.)
@@ -67,6 +67,22 @@ router.post('/user', checkUser, async (req, res)=>{
         
         await UserModel.findByIdAndUpdate(req.user.id, {$push : {voucherList : voucher._id}})
         res.status(200).json({"voucher added" : voucher}) 
+    } catch (error) {
+        res.status(400).json({"message" : error})
+    }
+})
+
+
+router.get('/use', checkUser, async (req,res)=>{
+    let allVouchers = await VoucherModel.find()
+
+    let user = await UserModel.findById(req.user.id)
+                            .populate("voucherList")
+
+    console.log("lai", req.user.id)
+    console.log("after that", user)
+    try {
+        res.status(200).json({"voucher used" : allVouchers}) 
     } catch (error) {
         res.status(400).json({"message" : error})
     }
