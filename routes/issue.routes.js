@@ -4,22 +4,39 @@ const UserModel = require('../models/user.model')
 const issueUpdateModel = require('../models/issueUpdates.model')
 const globalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
+const { cloudinary } = require('../lib/cloundinary')
+const { nanoid } = require('nanoid')
+const globalCaseStatusID = "60d04a0f21a73227222ac063"
 require('dotenv').config()
 
 /*
 Individual User
 */
 
-//User - For individual user (UserId) Get their own issues array
+//(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
+router.get('/', async (req, res) => {
+    let globalArrayOfIssues = await IssueModel.find()
+        .populate("IssueUpdate")
+        .populate("userID")
+        .populate("staffID")
+    try {
+        res.status(200).json({globalArrayOfIssues})
+    } catch (e)
+    {
+        console.log(e)
+        res.status(400).json({"message" : e})
+    }
+})
+
+//For individual user (UserId) Get their own issues array
 router.get('/user/home', checkUser, async(req, res) => {
     try {
         let user = await UserModel.find({_id: req.user.id})
         .populate("pendingIssues")
         .populate("closedIssues")
-        // .populate("voucherList")q
+        // .populate("voucherList")
         console.log(user)
         //let individualIssuesArray =
-
         res.status(200).json({user})
     } catch (e) {
         console.log(e)
@@ -32,7 +49,9 @@ router.post('/submit', checkUser, async (req, res) => {
     const newIssue = new IssueModel(req.body)
     // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
     newIssue.userID = req.user.id
-    // newIssue.issueID = (do we really need our own id since they got their own _id?)
+    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`  
+  
+
 
     //IssueUpdates
     const newIssueUpdate = new issueUpdateModel()
@@ -45,6 +64,7 @@ router.post('/submit', checkUser, async (req, res) => {
     newIssue.updates = newIssueUpdate._id
 
 
+
     console.log(newIssueUpdate)
     console.log("newIssueId", newIssue)
     try {
@@ -52,12 +72,14 @@ router.post('/submit', checkUser, async (req, res) => {
         await newIssueUpdate.save()
         await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
         await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
+
         res.status(201).json({newIssue})
     } catch(e){
         console.log(e)
         res.status(400).json({"message" : e})
     }
 })
+
 
 //User pending issue
 router.get('/pending', checkUser, async(req, res) => {
@@ -73,6 +95,7 @@ router.get('/pending', checkUser, async(req, res) => {
     }
 })
 
+
 //User closed issue
 router.get('/closed', checkUser, async(req, res) => {
     try {
@@ -84,6 +107,24 @@ router.get('/closed', checkUser, async(req, res) => {
 
         res.status(200).json({user})
     } catch (e) {
+        console.log(e)
+        res.status(400).json({"message": e})
+    }
+})
+
+
+//stopped here cuz
+router.get('/issue/:id', checkUser, async(req, res) => {
+    try {
+        let user = await UserModel.find({_id: req.user.id})
+            .populate("closedIssues")
+        // .populate("voucherList")
+        console.log(user)
+        //let individualIssuesArray =
+
+        res.status(200).json({user})
+      
+          } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
     }
@@ -119,6 +160,23 @@ router.get('/single/:issueid', checkUser, async(req, res) => {
     } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
+          }
+})
+
+
+// photo upload
+router.post('/upload', async (req, res) => {
+    try {
+        const fileStr = req.body.data;
+        const uploadResponse = await cloudinary.uploader.upload(fileStr, {
+            upload_preset: 'MGW_issuesPic',
+        });
+        console.log(uploadResponse);
+        res.status(201).json(uploadResponse);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ err: 'Something went wrong' });
+
     }
 })
 
@@ -152,21 +210,30 @@ router.get('/',checkUser,async (req, res) => {
 })
 
 
-//For updating issues status (Staff only) ----- Not completed yet
+//For updating issues status (Staff only) ----- completed
 router.put("/update/:issueid",checkUser, async(req, res)=> {
+    console.log("params", req.params.issueid)
+
     try {
         if(req.user.userType === "User") {
             throw "You are not authorized to view this page"
         }
-        let globalCaseStatus = await globalCaseStatusModel.find()
-            .populate("openIssues")
-            .populate("pendingIssues")
-            .populate("closedIssueSs")
-            .populate("deletedIssues")
 
-        //find by id and update
+        //IssueUpdates
+        const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = req.body.date //has both date and time or let it be split
+        newIssueUpdate.time = req.body.time //has both date and time or let it be split
+        // newIssueUpdate.update = //update description - To be filled in at staff form
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = req.params.issueid
+        await newIssueUpdate.save()
 
-        res.status(200).json({globalCaseStatus})
+        //findById issue and push into updates array
+        await IssueModel.findOneAndUpdate({_id:req.params.issueid}, {$push: { updates: newIssueUpdate._id}})
+
+
+        // let updatedIssue = issueUpdateModel.findOne({issueID:req.params.issueid},{})
+        res.status(201).json({newIssueUpdate})
     }catch(e){
         console.log(e)
         res.status(400).json({"message": e})
