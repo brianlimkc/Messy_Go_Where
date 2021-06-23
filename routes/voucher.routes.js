@@ -50,7 +50,7 @@ router.post('/admin/create', checkUser, async (req, res)=>{
 
 
 // This bit of code is for the user to select the voucher. 
-//voucher has to be value="num", so req.body.num will have a value.
+//voucher has to be value="num" then got choice as to voucherTemplate.length, so req.body.num will have a value.
 // please refer to voucherTemplate
 router.post('/user', checkUser, async (req, res)=>{
     let temp = {
@@ -70,7 +70,8 @@ router.post('/user', checkUser, async (req, res)=>{
     }
 })
 
-
+// When user selects button on frontend, it wil take value="num"
+// this should return the num-1(where num is voucherList.length) and delete accordingly. 
 router.get('/use', checkUser, async (req,res)=>{
     try {
         let allVouchers = await VoucherModel.find()
