@@ -70,7 +70,9 @@ router.post('/submit', checkUser, async (req, res) => {
     try {
         await newIssue.save()
         await newIssueUpdate.save()
-        await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
+        // await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
+        await globalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
+        
         await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
 
         res.status(201).json({newIssue})
@@ -191,9 +193,9 @@ Staff
 router.get('/global',checkUser,async (req, res) => {
     console.log("inside globalStatus Route")
     try {
-        // if(req.user.userType === "User") {
-        //     throw "You are not authorized to view this page"
-        // }
+        if(req.user.userType === "User") {
+            throw "You are not authorized to view this page"
+        }
         // let globalArrayOfIssues = await IssueModel.find()
         //     .populate("IssueUpdate")
         //     .populate("userID")

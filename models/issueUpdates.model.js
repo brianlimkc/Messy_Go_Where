@@ -6,12 +6,12 @@ const issueUpdateSchema = new Schema({
     time: String,
     updateDescription: { // to see whether there is further merge conflict
         type: String,
-        default: "Case under review"  // chose to keep BT code
+        default: "Issue submitted by User"  // chose to keep BT code
     },
     updateStatus: {
         type: String,
         required: true,
-        default: "In Progress",
+        default: "Open",
         enum: ["Open","In Progress","Closed","Deleted"]
     },
     issueID: {
