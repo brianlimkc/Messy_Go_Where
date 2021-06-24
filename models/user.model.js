@@ -29,10 +29,10 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Voucher"
     }],
-    voucherACount: Number,
-    voucherBCount: Number,
-    voucherCCount: Number,
-    voucherDCount: Number,
+    voucherACount: {type : Number, default: 0},
+    voucherBCount: {type : Number, default: 0},
+    voucherCCount: {type : Number, default: 0},
+    voucherDCount: {type : Number, default: 0},
 
 })
 
