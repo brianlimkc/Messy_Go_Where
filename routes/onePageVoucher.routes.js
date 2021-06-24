@@ -5,22 +5,15 @@ const voucherTemplate = require('../lib/voucherTemplate');
 
 router.get('/', checkUser, async (req, res)=>{
     let user = await UserModel.findById(req.user.id)
-    let vACount = user.voucherACount
-    let vBCount = user.voucherBCount
-    let vCCount = user.voucherCCount
-    let vDCount = user.voucherDCount
-    let userPoints = user.points
-
-    console.log(userPoints)
 
     try {
         res.status(200).json({
             "availableVouchers" : {voucherTemplate}, 
-             "voucherACount" : {vACount},
-             "voucherBCount" : {vBCount},
-             "voucherCCount" : {vCCount},
-             "voucherDCount" : {vDCount},
-             "userPoints" : {userPoints}
+             "voucherACount" : user.voucherACount,
+             "voucherBCount" : user.voucherBCount,
+             "voucherCCount" : user.voucherCCount,
+             "voucherDCount" : user.voucherDCount,
+             "userPoints" : user.points
         })
     } catch (error) {
         res.status(400).json({"message" : error})
@@ -38,22 +31,22 @@ router.post("/buy", checkUser, async (req,res)=>{
         if(userPoints < voucherTemplate[req.body.num].pointsCost){
             throw "Wah lao waste time"
         } else {
-            user.points = Number(userPoints) - Number(voucherTemplate[req.body.num-1].pointsCost);
+            user.points = Number(userPoints) - Number(voucherTemplate[req.body.num].pointsCost);
 
             switch (req.body.num) {
-                case 1:
+                case 0:
                     user.voucherACount++;
                     break;
             
-                case 2:
+                case 1:
                     user.voucherBCount++;
                     break;
 
-                case 3:
+                case 2:
                     user.voucherCCount++;
                     break;
                 
-                case 4:
+                case 3:
                     user.voucherDCount++;
                     break;
             }
@@ -81,7 +74,7 @@ router.post("/redeem", checkUser, async (req,res)=>{
         let user = await UserModel.findById(req.user.id)
 
             switch (req.body.num) {
-                case 1:
+                case 0:
                     if(user.voucherACount!==0){
                         user.voucherACount--;
                     } else{
@@ -89,7 +82,7 @@ router.post("/redeem", checkUser, async (req,res)=>{
                     }
                     break;
             
-                case 2:
+                case 1:
                     if(user.voucherBCount!==0){
                         user.voucherBCount--;
                     } else{
@@ -97,7 +90,7 @@ router.post("/redeem", checkUser, async (req,res)=>{
                     }
                     break;
 
-                case 3:
+                case 2:
                     if(user.voucherCCount!==0){
                         user.voucherCCount--;
                     } else{
@@ -105,7 +98,7 @@ router.post("/redeem", checkUser, async (req,res)=>{
                     }
                     break;
                 
-                case 4:
+                case 3:
                     if(user.voucherDCount!==0){
                         user.voucherDCount--;
                     } else{
