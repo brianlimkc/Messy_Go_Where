@@ -280,10 +280,10 @@ router.post('/submit', checkUser, async (req, res) => {
         await newIssue.save()
         await newIssueUpdate.save()
 
-        // Update Global Case Status        
+        // Update Global Case Status
         await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
 
-        //Update User Model     
+        //Update User Model
         await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
 
         res.status(201).json({newIssue})
@@ -400,7 +400,7 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
 
         let currentUserID = currentIssue.userID
         let currentStatus = currentIssue.issueStatus
-        
+
 
         // create new DELETED issueUpdate and save
         const newIssueUpdate = new issueUpdateModel()
@@ -453,11 +453,25 @@ router.post('/iRating/:issueID', checkUser, async (req, res) => {
         console.log(req.body)
         let rating = req.body.rating
         let CurrUser = await UserModel.findById(req.user.id)
+        let CurrIssue = await IssueModel.findById(req.params.issueID)
+        let CurrStaffID = CurrIssue.staffID
+        let CurrStaff = await UserModel.findById(CurrStaffID)
+
+        console.log(CurrStaff)
+
         let currentPoints = CurrUser.points
         let updatedPoints = currentPoints + issuePointReward
+
+        let currentPointsStaff = CurrStaff.points
+        let updatedPointsStaff = currentPointsStaff + issuePointReward
+
         console.log("current points:", currentPoints, "updated points:", updatedPoints)
+        console.log("current staff points:", currentPointsStaff, "updated staff points:", updatedPointsStaff)
+
         await IssueModel.findByIdAndUpdate(req.params.issueID, {$set: {rating: rating}})
         await UserModel.findByIdAndUpdate(req.user.id, {$set: {points: updatedPoints}})
+        await UserModel.findByIdAndUpdate(CurrStaffID, {$set: {points: updatedPointsStaff}})
+
         res.status(200).json()
     } catch (e)
         {
