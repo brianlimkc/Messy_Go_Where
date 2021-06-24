@@ -15,6 +15,21 @@ router.get('/', async (req,res) => {
 })
 
 
+// Route to show all user's voucher(s).
+router.get("/user/all", checkUser, async (req,res)=>{
+    let user = await UserModel.findById(req.user.id).populate("voucherList", "-issuedTo")
+
+    console.log({"user vouchers" : user.voucherList})
+    userVouchers = user.voucherList
+
+    try {
+        res.status(200).json({userVouchers})
+    } catch (error) {
+        res.status(400).json({"message": error})
+    }
+
+})
+
 // Only admin can create,later at the router.post can test if user is admin.
 router.get("/admin/create", checkUser, async (req, res)=>{
     let vouchers = await VoucherModel.find()
@@ -50,7 +65,7 @@ router.post('/admin/create', checkUser, async (req, res)=>{
 // This bit of code is for the user to select the voucher. 
 //voucher has to be value="num" then got choice as to voucherTemplate.length, so req.body.num will have a value.
 // please refer to voucherTemplate
-router.post('/user', checkUser, async (req, res)=>{
+router.post('/user/add', checkUser, async (req, res)=>{
     let temp = {
         ...voucherTemplate[req.body.num],
         issuedTo : req.user.id
