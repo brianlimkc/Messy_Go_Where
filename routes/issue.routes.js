@@ -70,7 +70,7 @@ router.post('/submit', checkUser, async (req, res) => {
     try {
         await newIssue.save()
         await newIssueUpdate.save()
-        await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
         await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
 
         res.status(201).json({newIssue})
