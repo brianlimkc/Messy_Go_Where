@@ -19,7 +19,8 @@ router.get('/', async (req,res) => {
 router.get("/user/all", checkUser, async (req,res)=>{
     let user = await UserModel.findById(req.user.id).populate("voucherList", "-issuedTo")
 
-    console.log({"user vouchers" : user.voucherList})
+
+    console.log({"user" : user})
     userVouchers = user.voucherList
 
     try {
@@ -66,17 +67,26 @@ router.post('/admin/create', checkUser, async (req, res)=>{
 //voucher has to be value="num" then got choice as to voucherTemplate.length, so req.body.num will have a value.
 // please refer to voucherTemplate
 router.post('/user/add', checkUser, async (req, res)=>{
-    let temp = {
-        ...voucherTemplate[req.body.num],
-        issuedTo : req.user.id
-    }
-    
+    let userPoints
+    let user = await UserModel.findById(req.user.id).populate("voucherList", "-issuedTo")
+
     try {
+        if(user.points < voucherTemplate[req.body.num].pointsCost){
+            throw "Oi waste my time"
+        } else if (user.points >= voucherTemplate[req.body.num].pointsCost){
+            user.points = Number(user.points)-Number(voucherTemplate[req.body.num].pointsCost)
+        }
+        
+        let temp = {
+            ...voucherTemplate[req.body.num],
+            issuedTo : req.user.id
+        }
         let voucher = new VoucherModel(temp)
         await voucher.save()
-
+        await user.save()
         // console.log(voucher) // will show the voucher that's tagged to the user.
         await UserModel.findByIdAndUpdate(req.user.id, {$push : {voucherList : voucher._id}})
+        console.log(user)
         res.status(200).json({"voucher added" : voucher}) 
     } catch (error) {
         res.status(400).json({"message" : error})
