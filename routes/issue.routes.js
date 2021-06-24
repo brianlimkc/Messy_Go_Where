@@ -28,7 +28,6 @@ router.get('/', async (req, res) => {
         res.status(400).json({"message" : e})
     }
 })
-
 //For individual user (UserId) Get their own issues array
 router.get('/user/home', checkUser, async(req, res) => {
     try {
@@ -44,9 +43,6 @@ router.get('/user/home', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
-
-
 //User pending issue
 router.get('/pending', checkUser, async(req, res) => {
     try {
@@ -60,8 +56,6 @@ router.get('/pending', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
-
 //User closed issue
 router.get('/closed', checkUser, async(req, res) => {
     try {
@@ -77,8 +71,6 @@ router.get('/closed', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
-
 //stopped here cuz
 router.get('/issue/:id', checkUser, async(req, res) => {
     try {
@@ -95,7 +87,6 @@ router.get('/issue/:id', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
 //User - View Individual updates for User usertype
 router.get('/single/:issueid', checkUser, async(req, res) => {
     let thisIssueId = req.params.issueid
@@ -111,7 +102,6 @@ router.get('/single/:issueid', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
           }
 })
-
 // photo upload
 router.post('/upload', async (req, res) => {
     try {
@@ -253,7 +243,7 @@ router.get('/staff/deleted',checkUser,async (req, res) => {
     }
 })
 
-
+//issue updates
 //Submit New Issue
 router.post('/submit', checkUser, async (req, res) => {
 
@@ -292,7 +282,6 @@ router.post('/submit', checkUser, async (req, res) => {
         res.status(400).json({"message" : e})
     }
 })
-
 // Accept Issue by Staff
 router.post('/iAccept/:issueid', checkUser, async (req, res) => {
 
@@ -334,7 +323,6 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
 // Resolve Issue by Staff
 router.post('/iResolved/:issueid', checkUser, async (req, res) => {
 
@@ -385,7 +373,6 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
         res.status(400).json({"message": e})
     }
 })
-
 // Close Issue by User or Staff
 router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
 
@@ -445,8 +432,7 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
         res.status(200).json({newIssueUpdate})
     }
 })
-
-
+// Rating
 router.post('/iRating/:issueID', checkUser, async (req, res) => {
     console.log("inside iRating")
     try {
@@ -479,8 +465,6 @@ router.post('/iRating/:issueID', checkUser, async (req, res) => {
         res.status(200).json()
         }
 })
-
-
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
     res.status(404).json({message: "Nothing to see here yet. Come back next time."})
