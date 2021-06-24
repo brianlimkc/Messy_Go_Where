@@ -15,12 +15,12 @@ router.get('/', checkUser, async (req, res)=>{
 
     try {
         res.status(200).json({
-            "available vouchers" : {voucherTemplate}, 
-             "voucher A count" : {vACount},
-             "voucher B count" : {vBCount},
-             "voucher C count" : {vCCount},
-             "voucher D count" : {vDCount},
-             "user points" : {userPoints}
+            "availableVouchers" : {voucherTemplate}, 
+             "voucherACount" : {vACount},
+             "voucherBCount" : {vBCount},
+             "voucherCCount" : {vCCount},
+             "voucherDCount" : {vDCount},
+             "userPoints" : {userPoints}
         })
     } catch (error) {
         res.status(400).json({"message" : error})
@@ -62,12 +62,12 @@ router.post("/buy", checkUser, async (req,res)=>{
         await user.save()
 
         res.status(200).json({
-            "available vouchers" : {voucherTemplate}, 
-             "voucher A count" : user.voucherACount,
-             "voucher B count" : user.voucherBCount,
-             "voucher C count" : user.voucherCCount,
-             "voucher D count" : user.voucherDCount,
-             "user points" : user.points
+            "availableVouchers" : {voucherTemplate}, 
+             "voucherACount" : user.voucherACount,
+             "voucherBCount" : user.voucherBCount,
+             "voucherCCount" : user.voucherCCount,
+             "voucherDCount" : user.voucherDCount,
+             "userPoints" : user.points
         })
     } catch (error) {
         res.status(400).json({"message" : error})
@@ -118,12 +118,12 @@ router.post("/redeem", checkUser, async (req,res)=>{
         await user.save()
 
         res.status(200).json({
-            "available vouchers" : {voucherTemplate}, 
-             "voucher A count" : user.voucherACount,
-             "voucher B count" : user.voucherBCount,
-             "voucher C count" : user.voucherCCount,
-             "voucher D count" : user.voucherDCount,
-             "user points" : user.points
+            "availableVouchers" : {voucherTemplate}, 
+             "voucherACount" : user.voucherACount,
+             "voucherBCount" : user.voucherBCount,
+             "voucherCCount" : user.voucherCCount,
+             "voucherDCount" : user.voucherDCount,
+             "userPoints" : user.points
         })
     } catch (error) {
         res.status(400).json({"message" : error})
