@@ -19,9 +19,7 @@ app.use(express.urlencoded({limit: "10mb", extended: true}))
 // app.use(express.static('node_modules'))
 // app.use(express.static('public'))
 app.use(express.static(path.resolve(__dirname, 'build')));
-app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
-});
+
 
 //routes
 
@@ -29,7 +27,11 @@ app.use("/api/auth", require('./routes/auth.routes'))
 app.use("/api/issue", require('./routes/issue.routes'))
 app.use("/api/vouchers", require('./routes/onePageVoucher.routes'))
 
-app.listen(process.env.PORT, () => console.log(`running on ${process.env.PORT}`))
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
+});
+
+app.listen(process.env.PORT || 8000, () => console.log(`running on ${process.env.PORT}`))
 
 
 
