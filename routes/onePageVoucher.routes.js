@@ -29,7 +29,7 @@ router.get('/', checkUser, async (req, res)=>{
 
 
 router.post("/buy", checkUser, async (req,res)=>{
-    console.log(voucherTemplate[req.body.num-1])
+    
     try {
         let user = await UserModel.findById(req.user.id)
 
@@ -57,6 +57,62 @@ router.post("/buy", checkUser, async (req,res)=>{
                     user.voucherDCount++;
                     break;
             }
+        }
+        
+        await user.save()
+
+        res.status(200).json({
+            "available vouchers" : {voucherTemplate}, 
+             "voucher A count" : user.voucherACount,
+             "voucher B count" : user.voucherBCount,
+             "voucher C count" : user.voucherCCount,
+             "voucher D count" : user.voucherDCount,
+             "user points" : user.points
+        })
+    } catch (error) {
+        res.status(400).json({"message" : error})
+    }
+})
+
+
+router.post("/redeem", checkUser, async (req,res)=>{
+    
+    try {
+        let user = await UserModel.findById(req.user.id)
+
+            switch (req.body.num) {
+                case 1:
+                    if(user.voucherACount!==0){
+                        user.voucherACount--;
+                    } else{
+                        throw "wah lao another one"
+                    }
+                    break;
+            
+                case 2:
+                    if(user.voucherBCount!==0){
+                        user.voucherBCount--;
+                    } else{
+                        throw "wah lao another one"
+                    }
+                    break;
+
+                case 3:
+                    if(user.voucherCCount!==0){
+                        user.voucherCCount--;
+                    } else{
+                        throw "wah lao another one"
+                    }
+                    break;
+                
+                case 4:
+                    if(user.voucherDCount!==0){
+                        user.voucherDCount--;
+                    } else{
+                        throw "wah lao another one"
+                    }
+                    break;
+            
         }
         
         await user.save()
