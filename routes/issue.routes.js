@@ -43,6 +43,43 @@ router.get('/user/home', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
+
+//User Issue Form - Post request Can do up the issue form now
+router.post('/submit', checkUser, async (req, res) => {
+    const newIssue = new IssueModel(req.body)
+    // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
+    newIssue.userID = req.user.id
+    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
+
+
+
+    //IssueUpdates
+    const newIssueUpdate = new issueUpdateModel()
+    newIssueUpdate.date = new Date() //has both date and time or let it be split
+    // newIssueUpdate.update = //update description - To be filled in at staff form
+    newIssueUpdate.userID = req.user.id
+    newIssueUpdate.issueID = newIssue._id
+
+    //push new issue into pending Issue array for both global and user
+    newIssue.updates = newIssueUpdate._id
+
+
+
+    console.log(newIssueUpdate)
+    console.log("newIssueId", newIssue)
+    try {
+        await newIssue.save()
+        await newIssueUpdate.save()
+        await globalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
+        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
+
+        res.status(201).json({newIssue})
+    } catch(e){
+        console.log(e)
+        res.status(400).json({"message" : e})
+    }
+})
+
 //User pending issue
 router.get('/pending', checkUser, async(req, res) => {
     try {
@@ -171,7 +208,6 @@ router.put("/update/:issueid",checkUser, async(req, res)=> {
 
         //findById issue and push into updates array
         await IssueModel.findOneAndUpdate({_id:req.params.issueid}, {$push: { updates: newIssueUpdate._id}})
-
 
         // let updatedIssue = issueUpdateModel.findOne({issueID:req.params.issueid},{})
         res.status(201).json({newIssueUpdate})
