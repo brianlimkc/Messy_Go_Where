@@ -55,6 +55,7 @@ router.post('/submit', checkUser, async (req, res) => {
     //IssueUpdates
     const newIssueUpdate = new issueUpdateModel()
     newIssueUpdate.date = new Date() //has both date and time or let it be split
+
     // newIssueUpdate.update = //update description - To be filled in at staff form
     newIssueUpdate.userID = req.user.id
     newIssueUpdate.issueID = newIssue._id
@@ -316,21 +317,19 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
         //auto time and date?
         //auto description?
         await newIssueUpdate.save()
+        let newIssueUpdateID = newIssueUpdate._id
 
         // update Staff pendingIssues with new issue
-        await UserModel.findByIdAndUpdate(currentStaffID, {push: {pendingIssues: issueID}})
+        await UserModel.findByIdAndUpdate(currentStaffID, {$push: {pendingIssues: issueID}})
 
         // update Issue updates with new issue update, issueStatus and staffID
-        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdate._id}}, {
-            $set: {
-                issueStatus: "In Progress",
-                staffID: currentStaffID
-            }
-        })
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdateID}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {issueStatus: "In Progress"}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {staffID: currentStaffID}})
 
         //update globalStatus
-        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {pendingIssues: issueID}})
-        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {closedIssues: issueID}})
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {openIssues: issueID}})
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {pendingIssues: issueID}})
         res.status(200).json({newIssueUpdate})
     } catch (e) {
         res.status(400).json({"message": e})
@@ -338,6 +337,7 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
 })
 
 router.post('/iResolved/:issueid', checkUser, async (req, res) => {
+    console.log("inside iResolved")
     try {
         let issueID = req.params.issueid
         let currentStaffID = req.user.id
@@ -348,14 +348,17 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
         newIssueUpdate.issueID = issueID
         newIssueUpdate.updateStatus = "Resolved"
         await newIssueUpdate.save()
+        let newIssueUpdateID = newIssueUpdate._id
 
         // update issue status
-        await IssueModel.findByIdAndUpdate(issueID, {$push: {updates: newIssueUpdate._id}})
+        await IssueModel.findByIdAndUpdate(issueID, {$push: {updates: newIssueUpdateID}})
         await IssueModel.findByIdAndUpdate(issueID, {$set: {issueStatus: "Resolved"}})
 
-
         //update user pendingIssues and closedIssues
-        let currentUserID = IssueModel.find(issueID).userID
+        // let currentUserID = await IssueModel.findById(issueID).userID
+        let currentUser = await IssueModel.findById(issueID)
+        let currentUserID = currentUser.userID
+
         await UserModel.findByIdAndUpdate(currentUserID, {$pull: {pendingIssues: issueID}})
         await UserModel.findByIdAndUpdate(currentUserID, {$push: {closedIssues: issueID}})
 
