@@ -7,10 +7,8 @@ const voucherTemplate = require('../lib/voucherTemplate');
 
 // Getting all vouchers info (currently returns empty array.)
 router.get('/', async (req,res) => {
-    let allVouchers = await VoucherModel.find()
-
     try {
-        res.status(200).json({allVouchers})
+        res.status(200).json({voucherTemplate})
     } catch (error) {
         res.status(400).json({"message": error})
     }
@@ -72,7 +70,7 @@ router.post('/user', checkUser, async (req, res)=>{
 
 // When user selects button on frontend, it wil take value="num"
 // this should return the num-1(where num is voucherList.length) and delete accordingly. 
-router.get('/use', checkUser, async (req,res)=>{
+router.get('/use/:voucherId', checkUser, async (req,res)=>{
     try {
         let allVouchers = await VoucherModel.find()
     
@@ -87,7 +85,12 @@ router.get('/use', checkUser, async (req,res)=>{
         user.voucherList.map(el=>{
             console.log("can log?",el._id)
         })
-        await UserModel.findByIdAndUpdate(req.user.id, { $pull : {voucherList: user.voucherList[req.body.num]}})
+        await UserModel.findByIdAndUpdate(req.user.id, { 
+            $pull : 
+            {voucherList: req.params.voucherId}
+        })
+
+        await UserModel.
 
         console.log("after that", user.voucherList)
         res.status(200).json({"voucher used" : allVouchers}) 
