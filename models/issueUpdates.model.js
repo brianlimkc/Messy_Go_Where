@@ -4,15 +4,12 @@ const Schema = mongoose.Schema
 const issueUpdateSchema = new Schema({
     date: String,
     time: String,
-    updateDescription: { // to see whether there is further merge conflict
-        type: String,
-        default: "Issue submitted by User"  // chose to keep BT code
-    },
+    updateDescription: String,
     updateStatus: {
         type: String,
         required: true,
         default: "Open",
-        enum: ["Open","In Progress","Resolved","Deleted"]
+        enum: ["Open","In Progress","Resolved","Closed"]
     },
     issueID: {
         type: Schema.Types.ObjectId,

@@ -22,7 +22,10 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Issue"
     }],
-    points: Number,
+    points: {
+        type: Number,
+        default: 0
+    },
     issuesSubmitted: Number,
     voucherList : [{
         type: Schema.Types.ObjectId,

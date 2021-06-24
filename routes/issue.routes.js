@@ -7,7 +7,7 @@ const checkUser = require('../lib/check')
 const { cloudinary } = require('../lib/cloundinary')
 const { nanoid } = require('nanoid')
 const globalCaseStatusID = "60d04a0f21a73227222ac063"
-
+const issuePointReward = 100
 require('dotenv').config()
 
 /*
@@ -45,39 +45,6 @@ router.get('/user/home', checkUser, async(req, res) => {
     }
 })
 
-//User Issue Form - Post request Can do up the issue form now
-router.post('/submit', checkUser, async (req, res) => {
-    const newIssue = new IssueModel(req.body)
-    // console.log(req.headers) left it here so I can explain that it go thru middleware, remove next time
-    newIssue.userID = req.user.id
-    newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
-
-    //IssueUpdates
-    const newIssueUpdate = new issueUpdateModel()
-    newIssueUpdate.date = new Date() //has both date and time or let it be split
-
-    // newIssueUpdate.update = //update description - To be filled in at staff form
-    newIssueUpdate.userID = req.user.id
-    newIssueUpdate.issueID = newIssue._id
-
-    //push new issue into pending Issue array for both global and user
-    newIssue.updates = newIssueUpdate._id
-
-    console.log(newIssueUpdate)
-    console.log("newIssueId", newIssue)
-    try {
-        await newIssue.save()
-        await newIssueUpdate.save()
-        // await GlobalCaseStatusModel.findByIdAndUpdate(process.env.GLOBSTATUS, {$push: { openIssues: newIssue._id}})
-        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
-        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
-
-        res.status(201).json({newIssue})
-    } catch(e){
-        console.log(e)
-        res.status(400).json({"message" : e})
-    }
-})
 
 
 //User pending issue
@@ -137,23 +104,6 @@ router.get('/single/:issueid', checkUser, async(req, res) => {
         let singleIssue = await IssueModel.findById(thisIssueId)
             .populate("updates")
 
-        // let user = await UserModel.find({_id: req.user.id})
-        //
-        // let pendIssue = user[0]["pendingIssues"]
-        // let closedIssue = user[0]["closedIssues"]
-        //
-        // //leaving these consolelogs to explain later
-        // // console.log(pendIssue.includes(thisIssueId))
-        // // console.log(closedIssue.includes(thisIssueId))
-        // let currentIssue = [] //might need better naming
-        // if (pendIssue.includes(thisIssueId) || closedIssue.includes(thisIssueId)){
-        //      currentIssue = await IssueModel.findById({_id: thisIssueId}) // change if we use our own issueid
-        //         .populate("updates")
-        //     // .populate("voucherList")
-        //     console.log(currentIssue)
-        // } else {
-        //     throw "issue not found for this user."
-        // }
         console.log("singleIssue retrieved")
         res.status(200).json({singleIssue})
     } catch (e) {
@@ -161,7 +111,6 @@ router.get('/single/:issueid', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
           }
 })
-
 
 // photo upload
 router.post('/upload', async (req, res) => {
@@ -304,13 +253,63 @@ router.get('/staff/deleted',checkUser,async (req, res) => {
     }
 })
 
+
+//Submit New Issue
+router.post('/submit', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+    try {
+        const newIssue = new IssueModel(req.body)
+        newIssue.userID = req.user.id
+        newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
+
+        //Create and populate IssueUpdates
+        const newIssueUpdate = new issueUpdateModel()
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = "New Issue submitted by User"
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = newIssue._id
+
+        //push new issue into pending Issue array for both global and user
+        newIssue.updates = newIssueUpdate._id
+
+        await newIssue.save()
+        await newIssueUpdate.save()
+
+        // Update Global Case Status        
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
+
+        //Update User Model     
+        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
+
+        res.status(201).json({newIssue})
+    } catch(e){
+        console.log(e)
+        res.status(400).json({"message" : e})
+    }
+})
+
+// Accept Issue by Staff
 router.post('/iAccept/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
     try {
         let issueID = req.params.issueid
         let currentStaffID = req.user.id
 
         // create new IN PROGRESS issueUpdate and save
         const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = "Our Staff are working on the issue"
         newIssueUpdate.userID = req.user.id
         newIssueUpdate.issueID = issueID
         newIssueUpdate.updateStatus = "In Progress"
@@ -336,7 +335,13 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
     }
 })
 
+// Resolve Issue by Staff
 router.post('/iResolved/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
     console.log("inside iResolved")
     try {
         let issueID = req.params.issueid
@@ -344,6 +349,9 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
 
         // create new RESOLVED issueUpdate and save
         const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = req.body.description
         newIssueUpdate.userID = currentStaffID
         newIssueUpdate.issueID = issueID
         newIssueUpdate.updateStatus = "Resolved"
@@ -378,7 +386,13 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
     }
 })
 
+// Close Issue by User or Staff
 router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
     console.log("inside delete issue")
     try {
         let issueID = req.params.issueid
@@ -386,12 +400,16 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
 
         let currentUserID = currentIssue.userID
         let currentStatus = currentIssue.issueStatus
+        
 
         // create new DELETED issueUpdate and save
-        const newIssueUpdate = new issueUpdateModel(req.body)
+        const newIssueUpdate = new issueUpdateModel()
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = req.body.description
         newIssueUpdate.userID = req.user.id
         newIssueUpdate.issueID = issueID
-        newIssueUpdate.updateStatus = "Deleted"
+        newIssueUpdate.updateStatus = "Closed"
         // auto time and date
         // auto description?
         await newIssueUpdate.save()
@@ -424,16 +442,34 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
         res.status(200).json({newIssueUpdate})
     } catch (e) {
         console.log(e)
-        res.status(400).json({"message": e})
+        res.status(200).json({newIssueUpdate})
     }
 })
+
+
+router.post('/iRating/:issueID', checkUser, async (req, res) => {
+    console.log("inside iRating")
+    try {
+        console.log(req.body)
+        let rating = req.body.rating
+        let CurrUser = await UserModel.findById(req.user.id)
+        let currentPoints = CurrUser.points
+        let updatedPoints = currentPoints + issuePointReward
+        console.log("current points:", currentPoints, "updated points:", updatedPoints)
+        await IssueModel.findByIdAndUpdate(req.params.issueID, {$set: {rating: rating}})
+        await UserModel.findByIdAndUpdate(req.user.id, {$set: {points: updatedPoints}})
+        res.status(200).json()
+    } catch (e)
+        {
+        console.log(e)
+        res.status(200).json()
+        }
+})
+
 
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
     res.status(404).json({message: "Nothing to see here yet. Come back next time."})
 })
-
-
-
 
 module.exports = router
