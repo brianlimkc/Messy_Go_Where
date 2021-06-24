@@ -20,9 +20,7 @@ router.get('/', checkUser, async (req, res)=>{
     }
 })
 
-
 router.post("/buy", checkUser, async (req,res)=>{
-
     try {
         let user = await UserModel.findById(req.user.id)
 
@@ -54,12 +52,18 @@ router.post("/buy", checkUser, async (req,res)=>{
 
         await user.save()
 
-        res.status(200)
+        res.status(200).json({
+            "availableVouchers" : {voucherTemplate},
+            "voucherACount" : user.voucherACount,
+            "voucherBCount" : user.voucherBCount,
+            "voucherCCount" : user.voucherCCount,
+            "voucherDCount" : user.voucherDCount,
+            "userPoints" : user.points
+        })
     } catch (error) {
         res.status(400).json({"message" : error})
     }
 })
-
 
 router.post("/redeem", checkUser, async (req,res)=>{
 
