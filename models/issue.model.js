@@ -8,7 +8,10 @@ const issuesSchema = new Schema({
     date: String,
     time: String,
     location: String,
-    rating: Number,
+    rating: {
+        type: Number,
+        default: -1
+    },
     updates: [{
         type: Schema.Types.ObjectId,
         ref: "IssueUpdate"
@@ -20,8 +23,8 @@ const issuesSchema = new Schema({
         enum: [
             "Open",
             "In Progress",
-            "Closed",
-            "Deleted"
+            "Resolved",
+            "Closed"
         ]
     },
     issueType: {

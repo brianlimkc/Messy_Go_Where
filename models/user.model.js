@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const bcrypt = require('bcrypt')
 
+
 const userSchema = new Schema({
     id: String,
     name: String,
@@ -28,6 +29,11 @@ const userSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Voucher"
     }],
+    voucherACount: {type : Number, default: 0},
+    voucherBCount: {type : Number, default: 0},
+    voucherCCount: {type : Number, default: 0},
+    voucherDCount: {type : Number, default: 0},
+
 })
 
 userSchema.methods.validPassword = function(password){

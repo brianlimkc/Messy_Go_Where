@@ -2,11 +2,12 @@ const router = require('express').Router()
 const IssueModel = require('../models/issue.model')
 const UserModel = require('../models/user.model')
 const issueUpdateModel = require('../models/issueUpdates.model')
-const globalCaseStatusModel = require('../models/globalCaseStatus.model')
+const GlobalCaseStatusModel = require('../models/globalCaseStatus.model')
 const checkUser = require('../lib/check')
 const { cloudinary } = require('../lib/cloundinary')
 const { nanoid } = require('nanoid')
 const globalCaseStatusID = "60d04a0f21a73227222ac063"
+const issuePointReward = 100
 require('dotenv').config()
 
 /*
@@ -43,6 +44,7 @@ router.get('/user/home', checkUser, async(req, res) => {
         res.status(400).json({"message": e})
     }
 })
+
 
 //User Issue Form - Post request Can do up the issue form now
 router.post('/submit', checkUser, async (req, res) => {
@@ -133,28 +135,11 @@ router.get('/issue/:id', checkUser, async(req, res) => {
 //User - View Individual updates for User usertype
 router.get('/single/:issueid', checkUser, async(req, res) => {
     let thisIssueId = req.params.issueid
-    // console.log(issueId)
+
     try {
         let singleIssue = await IssueModel.findById(thisIssueId)
             .populate("updates")
 
-        // let user = await UserModel.find({_id: req.user.id})
-        //
-        // let pendIssue = user[0]["pendingIssues"]
-        // let closedIssue = user[0]["closedIssues"]
-        //
-        // //leaving these consolelogs to explain later
-        // // console.log(pendIssue.includes(thisIssueId))
-        // // console.log(closedIssue.includes(thisIssueId))
-        // let currentIssue = [] //might need better naming
-        // if (pendIssue.includes(thisIssueId) || closedIssue.includes(thisIssueId)){
-        //      currentIssue = await IssueModel.findById({_id: thisIssueId}) // change if we use our own issueid
-        //         .populate("updates")
-        //     // .populate("voucherList")
-        //     console.log(currentIssue)
-        // } else {
-        //     throw "issue not found for this user."
-        // }
         console.log("singleIssue retrieved")
         res.status(200).json({singleIssue})
     } catch (e) {
@@ -187,7 +172,8 @@ Staff
 */
 
 //(Tested) for staff - get “/issue” – get user info – name, email, point, pending cases, resolved cases
-router.get('/',checkUser,async (req, res) => {
+router.get('/global',checkUser,async (req, res) => {
+    console.log("inside globalStatus Route")
     try {
         if(req.user.userType === "User") {
             throw "You are not authorized to view this page"
@@ -196,19 +182,21 @@ router.get('/',checkUser,async (req, res) => {
             .populate("IssueUpdate")
             .populate("userID")
             .populate("staffID")
-        let globalCaseStatus = await globalCaseStatusModel.find()
+        let globalCaseStatus = await GlobalCaseStatusModel.find()
             .populate("openIssues")
             .populate("pendingIssues")
             .populate("closedIssueSs")
             .populate("deletedIssues")
-        res.status(200).json({globalArrayOfIssues, globalCaseStatus})
+
+        // console.log(globalCaseStatus[0].openIssues)
+         // res.status(200).json({globalArrayOfIssues, globalCaseStatus})
+        res.status(200).json({globalCaseStatus})
+
     } catch (e) {
         console.log(e)
         res.status(400).json({"message": e})
     }
 })
-
-
 //For updating issues status (Staff only) ----- completed
 router.put("/update/:issueid",checkUser, async(req, res)=> {
     console.log("params", req.params.issueid)
@@ -237,18 +225,17 @@ router.put("/update/:issueid",checkUser, async(req, res)=> {
         res.status(400).json({"message": e})
     }
 })
-
 //view all open issues
 router.get('/staff/open',checkUser,async (req, res) => {
     try {
-        if (req.user.userType === "User") {
-            throw "You are not authorized to view this page"
-        }
-        let globalCaseStatus = await globalCaseStatusModel.find()
+        // if (req.user.userType === "User") {
+        //     throw "You are not authorized to view this page"
+        // }
+        let globalCaseStatus = await GlobalCaseStatusModel.find()
             .populate("openIssues")
         let globalOpenIssues = globalCaseStatus[0]["openIssues"]
         // console.log(globalOpenIssues)
-        res.status(400).json({globalOpenIssues})
+        res.status(200).json({globalOpenIssues})
     }catch(e){
             console.log(e)
     }
@@ -259,12 +246,12 @@ router.get('/staff/pending',checkUser,async (req, res) => {
         if (req.user.userType === "User") {
             throw "You are not authorized to view this page"
         }
-        let globalCaseStatus = await globalCaseStatusModel.find()
+        let globalCaseStatus = await GlobalCaseStatusModel.find()
             .populate("pendingIssues")
-        res.status(400).json({globalCaseStatus})
+        res.status(200).json({globalCaseStatus})
         let globalPendingIssues = globalCaseStatus[0]["pendingIssues"]
         // console.log(globalPendingIssues)
-        res.status(400).json({globalPendingIssues})
+        res.status(200).json({globalPendingIssues})
     }catch(e){
         console.log(e)
     }
@@ -275,32 +262,259 @@ router.get('/staff/closed',checkUser,async (req, res) => {
         if (req.user.userType === "User") {
             throw "You are not authorized to view this page"
         }
-        let globalCaseStatus= await globalCaseStatusModel.find()
+        let globalCaseStatus= await GlobalCaseStatusModel.find()
             .populate("closedIssues")
         // console.log(globalCaseStatus[0]["openIssues"])
         let globalClosedIssues = globalCaseStatus[0]["closedIssues"]
         // console.log(globalClosedIssues)
-        res.status(400).json({globalClosedIssues})
+        res.status(200).json({globalClosedIssues})
     }catch(e){
         console.log(e)
     }
 })
-
 //view all rejected issues
 router.get('/staff/deleted',checkUser,async (req, res) => {
     try {
         if (req.user.userType === "User") {
             throw "You are not authorized to view this page"
         }
-        let globalCaseStatus = await globalCaseStatusModel.find()
+        let globalCaseStatus = await GlobalCaseStatusModel.find()
             .populate("deletedIssues")
         let globalDeletedIssues = globalCaseStatus[0]["deletedIssues"]
         // console.log(globalDeletedIssues)
-        res.status(400).json({globalDeletedIssues})
+        res.status(200).json({globalDeletedIssues})
     }catch(e){
         console.log(e)
     }
 })
+
+
+//Submit New Issue
+router.post('/submit', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+    try {
+        const newIssue = new IssueModel(req.body)
+        newIssue.userID = req.user.id
+        newIssue.issueID = `Ref-${nanoid(8).toUpperCase()}`
+
+        //Create and populate IssueUpdates
+        const newIssueUpdate = new issueUpdateModel()
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = "New Issue submitted by User"
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = newIssue._id
+
+        //push new issue into pending Issue array for both global and user
+        newIssue.updates = newIssueUpdate._id
+
+        await newIssue.save()
+        await newIssueUpdate.save()
+
+        // Update Global Case Status
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
+
+        //Update User Model
+        await UserModel.findByIdAndUpdate(req.user.id, {$push: { pendingIssues: newIssue._id}})
+
+        res.status(201).json({newIssue})
+    } catch(e){
+        console.log(e)
+        res.status(400).json({"message" : e})
+    }
+})
+
+// Accept Issue by Staff
+router.post('/iAccept/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+
+    try {
+        let issueID = req.params.issueid
+        let currentStaffID = req.user.id
+
+        // create new IN PROGRESS issueUpdate and save
+        const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = "Our Staff are working on the issue"
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = issueID
+        newIssueUpdate.updateStatus = "In Progress"
+        //auto time and date?
+        //auto description?
+        await newIssueUpdate.save()
+        let newIssueUpdateID = newIssueUpdate._id
+
+        // update Staff pendingIssues with new issue
+        await UserModel.findByIdAndUpdate(currentStaffID, {$push: {pendingIssues: issueID}})
+
+        // update Issue updates with new issue update, issueStatus and staffID
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdateID}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {issueStatus: "In Progress"}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {staffID: currentStaffID}})
+
+        //update globalStatus
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {openIssues: issueID}})
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {pendingIssues: issueID}})
+        res.status(200).json({newIssueUpdate})
+    } catch (e) {
+        res.status(400).json({"message": e})
+    }
+})
+
+// Resolve Issue by Staff
+router.post('/iResolved/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+    console.log("inside iResolved")
+    try {
+        let issueID = req.params.issueid
+        let currentStaffID = req.user.id
+
+        // create new RESOLVED issueUpdate and save
+        const newIssueUpdate = new issueUpdateModel(req.body)
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = req.body.description
+        newIssueUpdate.userID = currentStaffID
+        newIssueUpdate.issueID = issueID
+        newIssueUpdate.updateStatus = "Resolved"
+        await newIssueUpdate.save()
+        let newIssueUpdateID = newIssueUpdate._id
+
+        // update issue status
+        await IssueModel.findByIdAndUpdate(issueID, {$push: {updates: newIssueUpdateID}})
+        await IssueModel.findByIdAndUpdate(issueID, {$set: {issueStatus: "Resolved"}})
+
+        //update user pendingIssues and closedIssues
+        // let currentUserID = await IssueModel.findById(issueID).userID
+        let currentUser = await IssueModel.findById(issueID)
+        let currentUserID = currentUser.userID
+
+        await UserModel.findByIdAndUpdate(currentUserID, {$pull: {pendingIssues: issueID}})
+        await UserModel.findByIdAndUpdate(currentUserID, {$push: {closedIssues: issueID}})
+
+        //update staff pendingIssues and closedIssues
+        await UserModel.findByIdAndUpdate(currentStaffID, {$pull: {pendingIssues: issueID}})
+        await UserModel.findByIdAndUpdate(currentStaffID, {$push: {closedIssues: issueID}})
+
+        //update globalStatus
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {pendingIssues: issueID}})
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {closedIssues: issueID}})
+
+        // increment points to user TBC
+
+        res.status(200).json({newIssueUpdate})
+    } catch (e) {
+        res.status(400).json({"message": e})
+    }
+})
+
+// Close Issue by User or Staff
+router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
+
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+    console.log("inside delete issue")
+    try {
+        let issueID = req.params.issueid
+        let currentIssue = await IssueModel.findById(issueID)
+
+        let currentUserID = currentIssue.userID
+        let currentStatus = currentIssue.issueStatus
+
+
+        // create new DELETED issueUpdate and save
+        const newIssueUpdate = new issueUpdateModel()
+        newIssueUpdate.date = date
+        newIssueUpdate.time = time
+        newIssueUpdate.updateDescription = req.body.description
+        newIssueUpdate.userID = req.user.id
+        newIssueUpdate.issueID = issueID
+        newIssueUpdate.updateStatus = "Closed"
+        // auto time and date
+        // auto description?
+        await newIssueUpdate.save()
+
+        switch (currentStatus) {
+            case "Open":
+                // pull from global status openIssues
+                await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {openIssues: issueID}})
+                break
+            case "In Progress":
+                // update staff
+                await UserModel.findByIdAndUpdate(currentStaffID, {$pull: {pendingIssues: issueID}})
+                await UserModel.findByIdAndUpdate(currentStaffID, {$push: {closedIssues: issueID}})
+                // pull from global status pendingIssues
+                await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$pull: {pendingIssues: issueID}})
+                break
+        }
+
+        // update user pendingIssues and closedIssues
+        await UserModel.findByIdAndUpdate(currentUserID, {$pull: {pendingIssues: issueID}})
+        await UserModel.findByIdAndUpdate(currentUserID, {$push: {closedIssues: issueID}})
+
+        // update issue issueStatus and updates
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$push: {updates: newIssueUpdate._id}})
+        await IssueModel.findByIdAndUpdate(req.params.issueid, {$set: {issueStatus: "Deleted"}})
+
+
+        // push into global status deleted issues
+        await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {push: {deletedIssues: issueID}})
+        res.status(200).json({newIssueUpdate})
+    } catch (e) {
+        console.log(e)
+        res.status(200).json({newIssueUpdate})
+    }
+})
+
+
+router.post('/iRating/:issueID', checkUser, async (req, res) => {
+    console.log("inside iRating")
+    try {
+        console.log(req.body)
+        let rating = req.body.rating
+        let CurrUser = await UserModel.findById(req.user.id)
+        let CurrIssue = await IssueModel.findById(req.params.issueID)
+        let CurrStaffID = CurrIssue.staffID
+        let CurrStaff = await UserModel.findById(CurrStaffID)
+
+        console.log(CurrStaff)
+
+        let currentPoints = CurrUser.points
+        let updatedPoints = currentPoints + issuePointReward
+
+        let currentPointsStaff = CurrStaff.points
+        let updatedPointsStaff = currentPointsStaff + issuePointReward
+
+        console.log("current points:", currentPoints, "updated points:", updatedPoints)
+        console.log("current staff points:", currentPointsStaff, "updated staff points:", updatedPointsStaff)
+
+        await IssueModel.findByIdAndUpdate(req.params.issueID, {$set: {rating: rating}})
+        await UserModel.findByIdAndUpdate(req.user.id, {$set: {points: updatedPoints}})
+        await UserModel.findByIdAndUpdate(CurrStaffID, {$set: {points: updatedPointsStaff}})
+
+        res.status(200).json()
+    } catch (e)
+        {
+        console.log(e)
+        res.status(200).json()
+        }
+})
+
 
 //catch all other request (maybe dont need)
 router.get('*', (req, res)=>{
