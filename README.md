@@ -7,9 +7,10 @@
 
  <h1>App Name: <em><strong>MessyGoWhere</strong></em></h1>
  <hr/>
- <p><strong>App Description (In Singlish):</strong> <br/>
    
  <h3> Issues Submission </h3><br/>
+ <p><strong>App Description (In Singlish):</strong> <br/>
+
  This is an app for municipal reporting.<br />
  Users can be created and differentiated into 3 groups. (Normal User, Staff, Admin)<br/>
  Normal Users: They are the kaypoh people hor that goes around and report all the messy rubbish ah. 
