@@ -285,7 +285,7 @@ router.post('/submit', checkUser, async (req, res) => {
 
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var time = today.getHours() + ":" + today.getMinutes()
 
     try {
         const newIssue = new IssueModel(req.body)
@@ -299,12 +299,12 @@ router.post('/submit', checkUser, async (req, res) => {
         newIssueUpdate.updateDescription = "New Issue submitted by User"
         newIssueUpdate.userID = req.user.id
         newIssueUpdate.issueID = newIssue._id
+        await newIssueUpdate.save()
 
         //push new issue into pending Issue array for both global and user
         newIssue.updates = newIssueUpdate._id
-
         await newIssue.save()
-        await newIssueUpdate.save()
+
 
         // Update Global Case Status
         await GlobalCaseStatusModel.findByIdAndUpdate(globalCaseStatusID, {$push: { openIssues: newIssue._id}})
@@ -323,7 +323,7 @@ router.post('/iAccept/:issueid', checkUser, async (req, res) => {
 
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var time = today.getHours() + ":" + today.getMinutes()
 
 
     try {
@@ -364,7 +364,7 @@ router.post('/iResolved/:issueid', checkUser, async (req, res) => {
 
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var time = today.getHours() + ":" + today.getMinutes()
 
     console.log("inside iResolved")
     try {
@@ -414,7 +414,7 @@ router.post('/iDeleted/:issueid', checkUser, async (req, res) => {
 
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var time = today.getHours() + ":" + today.getMinutes()
 
     console.log("inside delete issue")
     try {
