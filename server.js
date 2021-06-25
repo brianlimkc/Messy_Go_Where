@@ -25,7 +25,7 @@ app.use(express.static(path.resolve(__dirname, 'build')));
 
 app.use("/api/auth", require('./routes/auth.routes'))
 app.use("/api/issue", require('./routes/issue.routes'))
-app.use("/api/vouchers", require('./routes/onePageVoucher.routes'))
+app.use("/api/vouchers", require('./routes/OnePageVoucher.routes'))
 
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, 'build', 'index.html'));
